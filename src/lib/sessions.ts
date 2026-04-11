@@ -1,26 +1,40 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface Session {
   id: string;
-  studentName: string;
+  student_name: string;
+  subject: string;
+  date: string;
+  notes: string | null;
+  effort: number;
+  understanding: number;
+  engagement: number;
+  created_at: string;
+}
+
+export async function getSessions(): Promise<Session[]> {
+  const { data, error } = await supabase
+    .from("sessions")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function addSession(session: {
+  student_name: string;
   subject: string;
   date: string;
   notes: string;
   effort: number;
   understanding: number;
   engagement: number;
-}
-
-const STORAGE_KEY = "tutortrack_sessions";
-
-export function getSessions(): Session[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : [];
-}
-
-export function addSession(session: Omit<Session, "id">): Session {
-  const sessions = getSessions();
-  const newSession: Session = { ...session, id: crypto.randomUUID() };
-  sessions.unshift(newSession);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-  return newSession;
+}): Promise<Session> {
+  const { data, error } = await supabase
+    .from("sessions")
+    .insert(session)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }

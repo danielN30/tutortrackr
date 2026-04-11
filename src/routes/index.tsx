@@ -8,6 +8,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,14 +29,31 @@ function IndexPage() {
   const [effort, setEffort] = useState(0);
   const [understanding, setUnderstanding] = useState(0);
   const [engagement, setEngagement] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = studentName.trim() && subject.trim() && date && effort && understanding && engagement;
+  const canSubmit = studentName.trim() && subject.trim() && date && effort && understanding && engagement && !submitting;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
-    addSession({ studentName: studentName.trim(), subject: subject.trim(), date, notes: notes.trim(), effort, understanding, engagement });
-    navigate({ to: "/dashboard" });
+    setSubmitting(true);
+    try {
+      await addSession({
+        student_name: studentName.trim(),
+        subject: subject.trim(),
+        date,
+        notes: notes.trim(),
+        effort,
+        understanding,
+        engagement,
+      });
+      toast.success("Session logged!");
+      navigate({ to: "/dashboard" });
+    } catch {
+      toast.error("Failed to save session. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -70,7 +88,7 @@ function IndexPage() {
                 <StarRating label="Engagement" value={engagement} onChange={setEngagement} />
               </div>
               <Button type="submit" className="w-full" disabled={!canSubmit}>
-                Submit Session
+                {submitting ? "Saving…" : "Submit Session"}
               </Button>
             </form>
           </CardContent>
