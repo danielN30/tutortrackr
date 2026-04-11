@@ -63,6 +63,12 @@ function DashboardPage() {
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">{s.date}</p>
                     {s.notes && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.notes}</p>}
+                    {s.parent_summary && (
+                      <div className="mt-3 rounded-md bg-accent/50 px-3 py-2">
+                        <p className="text-xs font-medium text-foreground mb-0.5">Parent Summary</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{s.parent_summary}</p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex shrink-0 flex-col gap-1.5 text-right">
                     <div className="flex items-center gap-2">
