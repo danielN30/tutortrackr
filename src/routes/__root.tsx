@@ -35,11 +35,15 @@ export const Route = createRootRoute({
       { title: "TutorTrack" },
       { name: "description", content: "Track and manage tutoring sessions with ease." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "TutorTrack" },
+      { property: "og:description", content: "Track and manage tutoring sessions with ease." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "TutorTrack" },
+      { name: "twitter:description", content: "Track and manage tutoring sessions with ease." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/07ca223c-d985-454c-89db-3c704a711897/id-preview-37c62235--c8f9e5d1-c2d0-49dd-9c77-9a0b173bbfbf.lovable.app-1775909416788.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/07ca223c-d985-454c-89db-3c704a711897/id-preview-37c62235--c8f9e5d1-c2d0-49dd-9c77-9a0b173bbfbf.lovable.app-1775909416788.png" },
     ],
     links: [
       {
