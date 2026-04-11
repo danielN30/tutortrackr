@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can update sessions" ON public.sessions FOR UPDATE USING (true) WITH CHECK (true);
