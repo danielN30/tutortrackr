@@ -27,12 +27,12 @@ function IndexPage() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [topics, setTopics] = useState<TopicEntry[]>([]);
   const [effort, setEffort] = useState(0);
-  const [understanding, setUnderstanding] = useState(0);
+  
   const [engagement, setEngagement] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
   const allTopicsRated = topics.length > 0 && topics.every((t) => t.rating > 0);
-  const canSubmit = studentName.trim() && subject.trim() && date && effort && understanding && engagement && allTopicsRated && !submitting;
+  const canSubmit = studentName.trim() && subject.trim() && date && effort && engagement && allTopicsRated && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,7 +50,7 @@ function IndexPage() {
         date,
         notes: notesText,
         effort,
-        understanding,
+        understanding: 0,
         engagement,
       });
       toast.success("Session logged!");
@@ -85,9 +85,8 @@ function IndexPage() {
                 <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <TopicTable topics={topics} onChange={setTopics} />
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <StarRating label="Effort" value={effort} onChange={setEffort} />
-                <StarRating label="Understanding" value={understanding} onChange={setUnderstanding} />
                 <StarRating label="Engagement" value={engagement} onChange={setEngagement} />
               </div>
               <Button type="submit" className="w-full" disabled={!canSubmit}>
