@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { AppHeader } from "../components/AppHeader";
 import { getSessions, type Session } from "../lib/sessions";
 import { Card, CardContent } from "../components/ui/card";
-import { Star, BookOpen } from "lucide-react";
+import { Star, BookOpen, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -30,9 +30,10 @@ function Stars({ count }: { count: number }) {
 
 function DashboardPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setSessions(getSessions());
+    getSessions().then(setSessions).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -40,7 +41,11 @@ function DashboardPage() {
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="mb-6 text-xl font-semibold text-foreground">Session History</h1>
-        {sessions.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <BookOpen className="mb-3 h-10 w-10" />
             <p className="text-sm">No sessions logged yet.</p>
@@ -52,7 +57,7 @@ function DashboardPage() {
                 <CardContent className="flex items-start justify-between gap-4 py-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-medium text-foreground">{s.studentName}</span>
+                      <span className="font-medium text-foreground">{s.student_name}</span>
                       <span className="text-sm text-muted-foreground">·</span>
                       <span className="text-sm text-muted-foreground">{s.subject}</span>
                     </div>
