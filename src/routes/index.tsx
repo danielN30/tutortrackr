@@ -62,7 +62,7 @@ function IndexPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="notes">Session Notes</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What was covered? Any observations?" rows={4} />
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Addition was covered — 4/5 stars" rows={4} />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <StarRating label="Effort" value={effort} onChange={setEffort} />
