@@ -2,10 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppHeader } from "../components/AppHeader";
 import { StarRating } from "../components/StarRating";
+import { TopicTable, type TopicEntry } from "../components/TopicTable";
 import { addSession } from "../lib/sessions";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { toast } from "sonner";
@@ -25,24 +25,30 @@ function IndexPage() {
   const [studentName, setStudentName] = useState("");
   const [subject, setSubject] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [notes, setNotes] = useState("");
+  const [topics, setTopics] = useState<TopicEntry[]>([]);
   const [effort, setEffort] = useState(0);
   const [understanding, setUnderstanding] = useState(0);
   const [engagement, setEngagement] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = studentName.trim() && subject.trim() && date && effort && understanding && engagement && !submitting;
+  const allTopicsRated = topics.length > 0 && topics.every((t) => t.rating > 0);
+  const canSubmit = studentName.trim() && subject.trim() && date && effort && understanding && engagement && allTopicsRated && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
     try {
+      // Serialize topics as structured text for notes + AI summary
+      const notesText = topics
+        .map((t) => `${t.topic} — ${t.rating}/5 stars`)
+        .join("\n");
+
       await addSession({
         student_name: studentName.trim(),
         subject: subject.trim(),
         date,
-        notes: notes.trim(),
+        notes: notesText,
         effort,
         understanding,
         engagement,
@@ -78,10 +84,7 @@ function IndexPage() {
                 <Label htmlFor="date">Date</Label>
                 <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="notes">Session Notes</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Addition was covered — 4/5 stars" rows={4} />
-              </div>
+              <TopicTable topics={topics} onChange={setTopics} />
               <div className="grid grid-cols-3 gap-4">
                 <StarRating label="Effort" value={effort} onChange={setEffort} />
                 <StarRating label="Understanding" value={understanding} onChange={setUnderstanding} />
