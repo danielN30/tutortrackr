@@ -22,6 +22,7 @@ export type Database = {
           engagement: number
           id: string
           notes: string | null
+          parent_summary: string | null
           student_name: string
           subject: string
           understanding: number
@@ -33,6 +34,7 @@ export type Database = {
           engagement: number
           id?: string
           notes?: string | null
+          parent_summary?: string | null
           student_name: string
           subject: string
           understanding: number
@@ -44,6 +46,7 @@ export type Database = {
           engagement?: number
           id?: string
           notes?: string | null
+          parent_summary?: string | null
           student_name?: string
           subject?: string
           understanding?: number
