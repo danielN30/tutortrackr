@@ -75,7 +75,7 @@ function LoginPage() {
           </div>
           <CardTitle className="text-xl">TutorTrack</CardTitle>
           <CardDescription>
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+            {mode === "forgot" ? "Enter your email to reset your password" : mode === "signup" ? "Create your account" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -91,30 +91,43 @@ function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                minLength={6}
-                required
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  minLength={6}
+                  required
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Please wait…" : isSignUp ? "Sign Up" : "Sign In"}
+              {submitting ? "Please wait…" : mode === "forgot" ? "Send Reset Link" : mode === "signup" ? "Sign Up" : "Sign In"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          {mode === "signin" && (
+            <p className="mt-3 text-center">
+              <button
+                type="button"
+                className="text-sm text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+                onClick={() => setMode("forgot")}
+              >
+                Forgot password?
+              </button>
+            </p>
+          )}
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
               className="text-primary underline-offset-2 hover:underline"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
             >
-              {isSignUp ? "Sign in" : "Sign up"}
+              {mode === "signup" ? "Sign in" : "Sign up"}
             </button>
           </p>
         </CardContent>
