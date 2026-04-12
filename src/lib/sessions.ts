@@ -11,6 +11,7 @@ export interface Session {
   engagement: number;
   parent_summary: string | null;
   created_at: string;
+  user_id: string | null;
 }
 
 export async function getSessions(): Promise<Session[]> {
@@ -30,8 +31,8 @@ export async function addSession(session: {
   effort: number;
   understanding: number;
   engagement: number;
+  user_id: string;
 }): Promise<Session> {
-  // 1. Insert the session
   const { data, error } = await supabase
     .from("sessions")
     .insert(session)
@@ -39,7 +40,6 @@ export async function addSession(session: {
     .single();
   if (error) throw error;
 
-  // 2. Generate AI summary (non-blocking for the insert)
   try {
     const { data: fnData, error: fnError } = await supabase.functions.invoke(
       "generate-summary",
@@ -65,7 +65,6 @@ export async function addSession(session: {
       }
     }
   } catch {
-    // Summary generation failed silently — session is still saved
     console.warn("AI summary generation failed");
   }
 

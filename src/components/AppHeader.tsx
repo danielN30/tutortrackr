@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 export function AppHeader() {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
@@ -9,7 +13,7 @@ export function AppHeader() {
           <BookOpen className="h-5 w-5 text-primary" />
           <span className="text-lg font-semibold tracking-tight">TutorTrack</span>
         </Link>
-        <nav className="flex gap-1">
+        <nav className="flex items-center gap-1">
           <Link
             to="/"
             activeOptions={{ exact: true }}
@@ -32,6 +36,16 @@ export function AppHeader() {
           >
             Students
           </Link>
+          {user && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => signOut()}
+              className="ml-2 text-muted-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          )}
         </nav>
       </div>
     </header>

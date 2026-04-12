@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { StarRating } from "../components/StarRating";
 import { TopicTable, type TopicEntry } from "../components/TopicTable";
@@ -9,6 +10,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,13 +23,32 @@ export const Route = createFileRoute("/")({
 });
 
 function IndexPage() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    navigate({ to: "/login" });
+    return null;
+  }
+
+  return <SessionForm userId={user.id} />;
+}
+
+function SessionForm({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const [studentName, setStudentName] = useState("");
   const [subject, setSubject] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [topics, setTopics] = useState<TopicEntry[]>([]);
   const [effort, setEffort] = useState(0);
-  
   const [engagement, setEngagement] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -39,7 +60,6 @@ function IndexPage() {
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      // Serialize topics as structured text for notes + AI summary
       const notesText = topics
         .map((t) => `${t.topic} — ${t.rating}/5 stars`)
         .join("\n");
@@ -52,6 +72,7 @@ function IndexPage() {
         effort,
         understanding: 0,
         engagement,
+        user_id: userId,
       });
       toast.success("Session logged!");
       navigate({ to: "/dashboard" });

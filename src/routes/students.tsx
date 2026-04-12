@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { supabase } from "../integrations/supabase/client";
 import { Button } from "../components/ui/button";
@@ -28,6 +29,8 @@ interface Student {
 }
 
 function StudentsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -46,8 +49,21 @@ function StudentsPage() {
   }
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
     loadStudents();
-  }, []);
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const canSubmit = name.trim() && subject.trim() && parentEmail.trim() && !submitting;
 
@@ -59,6 +75,7 @@ function StudentsPage() {
       name: name.trim(),
       subject: subject.trim(),
       parent_email: parentEmail.trim(),
+      user_id: user!.id,
     });
     if (error) {
       toast.error("Failed to add student.");
