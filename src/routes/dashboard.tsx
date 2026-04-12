@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { getSessions, type Session } from "../lib/sessions";
 import { Card, CardContent } from "../components/ui/card";
@@ -29,12 +30,27 @@ function Stars({ count }: { count: number }) {
 }
 
 function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
     getSessions().then(setSessions).finally(() => setLoading(false));
-  }, []);
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,10 +90,6 @@ function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground w-20">Effort</span>
                       <Stars count={s.effort} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground w-20">Understanding</span>
-                      <Stars count={s.understanding} />
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground w-20">Engagement</span>
