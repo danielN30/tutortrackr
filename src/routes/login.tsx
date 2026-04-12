@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,17 +22,33 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+    if (!email.trim()) return;
     setSubmitting(true);
 
-    if (isSignUp) {
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Check your email for a password reset link.");
+        setMode("signin");
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    if (!password.trim()) { setSubmitting(false); return; }
+
+    if (mode === "signup") {
       const { error } = await signUp(email.trim(), password);
       if (error) {
         toast.error(error);
@@ -58,7 +75,7 @@ function LoginPage() {
           </div>
           <CardTitle className="text-xl">TutorTrack</CardTitle>
           <CardDescription>
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+            {mode === "forgot" ? "Enter your email to reset your password" : mode === "signup" ? "Create your account" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,30 +91,43 @@ function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                minLength={6}
-                required
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  minLength={6}
+                  required
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Please wait…" : isSignUp ? "Sign Up" : "Sign In"}
+              {submitting ? "Please wait…" : mode === "forgot" ? "Send Reset Link" : mode === "signup" ? "Sign Up" : "Sign In"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          {mode === "signin" && (
+            <p className="mt-3 text-center">
+              <button
+                type="button"
+                className="text-sm text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+                onClick={() => setMode("forgot")}
+              >
+                Forgot password?
+              </button>
+            </p>
+          )}
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
               className="text-primary underline-offset-2 hover:underline"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
             >
-              {isSignUp ? "Sign in" : "Sign up"}
+              {mode === "signup" ? "Sign in" : "Sign up"}
             </button>
           </p>
         </CardContent>
