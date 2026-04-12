@@ -42,7 +42,7 @@ Write a calm, informative parent summary.`;
             {
               role: "system",
               content:
-                "You are a friendly tutor assistant. Write concise, encouraging parent summaries.",
+                "You are a professional tutor assistant. Write concise, informative parent summaries. Be encouraging but measured — avoid exclamation marks and overly positive language. Focus on facts and gentle guidance.",
             },
             { role: "user", content: prompt },
           ],
