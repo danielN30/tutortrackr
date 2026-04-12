@@ -17,7 +17,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const prompt = `You are a tutor writing a brief, warm summary for a parent about their child's tutoring session. Keep it to 2-3 sentences, positive but honest.
+    const prompt = `You are a tutor writing a brief, honest summary for a parent about their child's tutoring session. Keep it to 2-3 sentences. Be informative and encouraging but avoid being overly enthusiastic or using excessive praise. Focus on what was covered, how the student performed, and any areas to keep working on.
 
 Student: ${studentName}
 Subject: ${subject}
@@ -26,7 +26,7 @@ Effort: ${effort}/5
 Understanding: ${understanding}/5
 Engagement: ${engagement}/5
 
-Write a parent-friendly summary of this session.`;
+Write a calm, informative parent summary.`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
