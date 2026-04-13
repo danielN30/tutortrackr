@@ -1,10 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { getSessions, type Session } from "../lib/sessions";
 import { Card, CardContent } from "../components/ui/card";
 import { Star, BookOpen, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -34,6 +41,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState("all");
 
   useEffect(() => {
     if (authLoading) return;
@@ -43,6 +51,21 @@ function DashboardPage() {
     }
     getSessions().then(setSessions).finally(() => setLoading(false));
   }, [user, authLoading, navigate]);
+
+  const studentNames = useMemo(() => {
+    const names = new Set(sessions.map((s) => s.student_name));
+    return Array.from(names).sort();
+  }, [sessions]);
+
+  const filtered = useMemo(
+    () =>
+      selectedStudent === "all"
+        ? sessions
+        : sessions.filter((s) => s.student_name === selectedStudent),
+    [sessions, selectedStudent]
+  );
+
+  const lastSessionDate = filtered.length > 0 ? filtered[0].date : null;
 
   if (authLoading || !user) {
     return (
@@ -56,7 +79,40 @@ function DashboardPage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-10">
-        <h1 className="mb-6 text-xl font-semibold text-foreground">Session History</h1>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Session History</h1>
+          {!loading && sessions.length > 0 && (
+            <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+              <SelectTrigger className="w-full sm:w-52">
+                <SelectValue placeholder="All Students" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Students</SelectItem>
+                {studentNames.map((name) => (
+                  <SelectItem key={name} value={name}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
+        {!loading && sessions.length > 0 && (
+          <div className="mb-6 flex gap-4 text-sm text-muted-foreground">
+            <span>
+              <span className="font-medium text-foreground">{filtered.length}</span>{" "}
+              session{filtered.length !== 1 ? "s" : ""}
+            </span>
+            {lastSessionDate && (
+              <>
+                <span>·</span>
+                <span>Last session: {lastSessionDate}</span>
+              </>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -66,9 +122,14 @@ function DashboardPage() {
             <BookOpen className="mb-3 h-10 w-10" />
             <p className="text-sm">No sessions logged yet.</p>
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <BookOpen className="mb-3 h-10 w-10" />
+            <p className="text-sm">No sessions for this student.</p>
+          </div>
         ) : (
           <div className="space-y-3">
-            {sessions.map((s) => (
+            {filtered.map((s) => (
               <Card key={s.id}>
                 <CardContent className="flex items-start justify-between gap-4 py-4">
                   <div className="min-w-0 flex-1">
