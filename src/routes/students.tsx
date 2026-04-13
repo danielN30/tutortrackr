@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
@@ -145,16 +145,18 @@ function StudentsPage() {
         ) : (
           <div className="space-y-3">
             {students.map((s) => (
-              <Card key={s.id}>
-                <CardContent className="py-4">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-foreground">{s.name}</span>
-                    <span className="text-sm text-muted-foreground">·</span>
-                    <span className="text-sm text-muted-foreground">{s.subject}</span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{s.parent_email}</p>
-                </CardContent>
-              </Card>
+              <Link key={s.id} to="/students/$studentId" params={{ studentId: encodeURIComponent(s.name) }} className="block">
+                <Card className="transition-colors hover:bg-accent/40 cursor-pointer">
+                  <CardContent className="py-4">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-medium text-foreground">{s.name}</span>
+                      <span className="text-sm text-muted-foreground">·</span>
+                      <span className="text-sm text-muted-foreground">{s.subject}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{s.parent_email}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
