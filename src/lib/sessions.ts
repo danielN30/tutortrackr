@@ -10,8 +10,10 @@ export interface Session {
   understanding: number;
   engagement: number;
   parent_summary: string | null;
+  recommendation: string | null;
   created_at: string;
   user_id: string | null;
+  student_id: string | null;
 }
 
 export async function getSessions(): Promise<Session[]> {
@@ -52,17 +54,25 @@ export async function addSession(session: {
           effort: session.effort,
           understanding: session.understanding,
           engagement: session.engagement,
+          userId: session.user_id,
         },
       }
     );
 
-    if (!fnError && fnData?.summary) {
-      const { error: updateError } = await supabase
-        .from("sessions")
-        .update({ parent_summary: fnData.summary })
-        .eq("id", data.id);
-      if (!updateError) {
-        data.parent_summary = fnData.summary;
+    if (!fnError && fnData) {
+      const updates: { parent_summary?: string; recommendation?: string } = {};
+      if (fnData.summary) updates.parent_summary = fnData.summary;
+      if (fnData.recommendation) updates.recommendation = fnData.recommendation;
+
+      if (Object.keys(updates).length > 0) {
+        const { error: updateError } = await supabase
+          .from("sessions")
+          .update(updates)
+          .eq("id", data.id);
+        if (!updateError) {
+          if (fnData.summary) data.parent_summary = fnData.summary;
+          if (fnData.recommendation) data.recommendation = fnData.recommendation;
+        }
       }
     }
   } catch {

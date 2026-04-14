@@ -227,6 +227,12 @@ function StudentAnalyticsPage() {
                           <p className="text-sm text-foreground">{s.parent_summary}</p>
                         </div>
                       )}
+                      {s.recommendation && (
+                        <div className="rounded-md bg-primary/5 border border-primary/10 p-3 mt-2">
+                          <p className="text-xs font-medium text-primary mb-1">Ongoing Recommendations</p>
+                          <p className="text-sm text-foreground">{s.recommendation}</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
