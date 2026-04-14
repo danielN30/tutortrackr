@@ -60,7 +60,7 @@ export async function addSession(session: {
     );
 
     if (!fnError && fnData) {
-      const updates: Record<string, string> = {};
+      const updates: { parent_summary?: string; recommendation?: string } = {};
       if (fnData.summary) updates.parent_summary = fnData.summary;
       if (fnData.recommendation) updates.recommendation = fnData.recommendation;
 
