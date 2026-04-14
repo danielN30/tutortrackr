@@ -23,6 +23,7 @@ export type Database = {
           id: string
           notes: string | null
           parent_summary: string | null
+          recommendation: string | null
           student_id: string | null
           student_name: string
           subject: string
@@ -37,6 +38,7 @@ export type Database = {
           id?: string
           notes?: string | null
           parent_summary?: string | null
+          recommendation?: string | null
           student_id?: string | null
           student_name: string
           subject: string
@@ -51,6 +53,7 @@ export type Database = {
           id?: string
           notes?: string | null
           parent_summary?: string | null
+          recommendation?: string | null
           student_id?: string | null
           student_name?: string
           subject?: string
