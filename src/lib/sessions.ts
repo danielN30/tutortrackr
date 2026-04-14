@@ -32,6 +32,7 @@ export async function addSession(session: {
   understanding: number;
   engagement: number;
   user_id: string;
+  student_id?: string;
 }): Promise<Session> {
   const { data, error } = await supabase
     .from("sessions")
