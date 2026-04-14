@@ -1,14 +1,22 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { StarRating } from "../components/StarRating";
 import { TopicTable, type TopicEntry } from "../components/TopicTable";
 import { addSession } from "../lib/sessions";
+import { supabase } from "../integrations/supabase/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -42,22 +50,42 @@ function IndexPage() {
   return <SessionForm userId={user.id} />;
 }
 
+interface StudentOption {
+  id: string;
+  name: string;
+  subject: string;
+}
+
 function SessionForm({ userId }: { userId: string }) {
   const navigate = useNavigate();
-  const [studentName, setStudentName] = useState("");
-  const [subject, setSubject] = useState("");
+  const [students, setStudents] = useState<StudentOption[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [topics, setTopics] = useState<TopicEntry[]>([]);
   const [effort, setEffort] = useState(0);
   const [engagement, setEngagement] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    supabase
+      .from("students")
+      .select("id, name, subject")
+      .order("name")
+      .then(({ data }) => {
+        setStudents(data ?? []);
+        setStudentsLoading(false);
+      });
+  }, []);
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId);
+
   const allTopicsRated = topics.length > 0 && topics.every((t) => t.rating > 0);
-  const canSubmit = studentName.trim() && subject.trim() && date && effort && engagement && allTopicsRated && !submitting;
+  const canSubmit = selectedStudentId && date && effort && engagement && allTopicsRated && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !selectedStudent) return;
     setSubmitting(true);
     try {
       const notesText = topics
@@ -65,14 +93,15 @@ function SessionForm({ userId }: { userId: string }) {
         .join("\n");
 
       await addSession({
-        student_name: studentName.trim(),
-        subject: subject.trim(),
+        student_name: selectedStudent.name,
+        subject: selectedStudent.subject,
         date,
         notes: notesText,
         effort,
         understanding: 0,
         engagement,
         user_id: userId,
+        student_id: selectedStudentId,
       });
       toast.success("Session logged!");
       navigate({ to: "/dashboard" });
@@ -94,12 +123,32 @@ function SessionForm({ userId }: { userId: string }) {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
-                <Label htmlFor="studentName">Student Name</Label>
-                <Input id="studentName" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="e.g. Sarah Johnson" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Mathematics" />
+                <Label>Student</Label>
+                {studentsLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Loading students…
+                  </div>
+                ) : students.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">
+                    No students added yet.{" "}
+                    <Link to="/students" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      Add a student
+                    </Link>
+                  </p>
+                ) : (
+                  <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a student" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {students.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} · {s.subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="date">Date</Label>
