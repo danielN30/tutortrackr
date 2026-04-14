@@ -146,6 +146,12 @@ function DashboardPage() {
                         <p className="text-sm text-muted-foreground leading-relaxed">{s.parent_summary}</p>
                       </div>
                     )}
+                    {s.recommendation && (
+                      <div className="mt-2 rounded-md bg-primary/5 border border-primary/10 px-3 py-2">
+                        <p className="text-xs font-medium text-primary mb-0.5">Ongoing Recommendations</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{s.recommendation}</p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex shrink-0 flex-col gap-1.5 text-right">
                     <div className="flex items-center gap-2">
