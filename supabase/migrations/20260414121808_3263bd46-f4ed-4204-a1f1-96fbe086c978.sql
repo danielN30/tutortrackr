@@ -1,0 +1,1 @@
+ALTER TABLE public.sessions ADD COLUMN student_id uuid REFERENCES public.students(id) ON DELETE SET NULL;

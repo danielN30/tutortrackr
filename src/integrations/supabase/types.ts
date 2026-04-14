@@ -23,6 +23,7 @@ export type Database = {
           id: string
           notes: string | null
           parent_summary: string | null
+          student_id: string | null
           student_name: string
           subject: string
           understanding: number
@@ -36,6 +37,7 @@ export type Database = {
           id?: string
           notes?: string | null
           parent_summary?: string | null
+          student_id?: string | null
           student_name: string
           subject: string
           understanding: number
@@ -49,12 +51,21 @@ export type Database = {
           id?: string
           notes?: string | null
           parent_summary?: string | null
+          student_id?: string | null
           student_name?: string
           subject?: string
           understanding?: number
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sessions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
