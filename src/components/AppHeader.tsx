@@ -8,7 +8,7 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 text-foreground">
           <BookOpen className="h-5 w-5 text-primary" />
           <span className="text-lg font-semibold tracking-tight">TutorTrack</span>
@@ -20,6 +20,13 @@ export function AppHeader() {
             className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Dashboard
+          </Link>
+          <Link
+            to="/calendar"
+            activeProps={{ className: "bg-accent text-accent-foreground" }}
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Calendar
           </Link>
           <Link
             to="/"
@@ -34,7 +41,7 @@ export function AppHeader() {
             activeProps={{ className: "bg-accent text-accent-foreground" }}
             className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            Session History
+            History
           </Link>
           <Link
             to="/students"
