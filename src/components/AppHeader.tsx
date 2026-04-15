@@ -15,6 +15,13 @@ export function AppHeader() {
         </Link>
         <nav className="flex items-center gap-1">
           <Link
+            to="/dashboard"
+            activeProps={{ className: "bg-accent text-accent-foreground" }}
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Dashboard
+          </Link>
+          <Link
             to="/"
             activeOptions={{ exact: true }}
             activeProps={{ className: "bg-accent text-accent-foreground" }}
