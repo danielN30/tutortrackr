@@ -60,6 +60,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-star-filled: var(--star-filled);
   --color-star-empty: var(--star-empty);
+  --color-session-scheduled: var(--session-scheduled);
+  --color-session-completed: var(--session-completed);
 }
 
 :root {
