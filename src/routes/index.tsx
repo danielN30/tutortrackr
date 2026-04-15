@@ -104,7 +104,7 @@ function SessionForm({ userId }: { userId: string }) {
         student_id: selectedStudentId,
       });
       toast.success("Session logged!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/session-history" });
     } catch {
       toast.error("Failed to save session. Please try again.");
     } finally {
