@@ -18,12 +18,15 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          duration_minutes: number
           effort: number
           engagement: number
           id: string
           notes: string | null
           parent_summary: string | null
           recommendation: string | null
+          start_time: string | null
+          status: string
           student_id: string | null
           student_name: string
           subject: string
@@ -33,12 +36,15 @@ export type Database = {
         Insert: {
           created_at?: string
           date: string
+          duration_minutes?: number
           effort: number
           engagement: number
           id?: string
           notes?: string | null
           parent_summary?: string | null
           recommendation?: string | null
+          start_time?: string | null
+          status?: string
           student_id?: string | null
           student_name: string
           subject: string
@@ -48,12 +54,15 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
+          duration_minutes?: number
           effort?: number
           engagement?: number
           id?: string
           notes?: string | null
           parent_summary?: string | null
           recommendation?: string | null
+          start_time?: string | null
+          status?: string
           student_id?: string | null
           student_name?: string
           subject?: string

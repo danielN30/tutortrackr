@@ -5,10 +5,13 @@ export interface Session {
   student_name: string;
   subject: string;
   date: string;
+  start_time: string | null;
+  duration_minutes: number;
   notes: string | null;
   effort: number;
   understanding: number;
   engagement: number;
+  status: string;
   parent_summary: string | null;
   recommendation: string | null;
   created_at: string;
