@@ -3,8 +3,30 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "../components/AppHeader";
 import { getSessions, type Session } from "../lib/sessions";
+import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
-import { Star, BookOpen, Loader2 } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { Star, BookOpen, Loader2, Pencil, Trash2 } from "lucide-react";
+import { StarRating } from "../components/StarRating";
 import {
   Select,
   SelectContent,
@@ -12,11 +34,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/session-history")({
   head: () => ({
     meta: [
-      { title: "Dashboard — TutorTrack" },
+      { title: "Session History — TutorTrack" },
       { name: "description", content: "View all logged tutoring sessions." },
     ],
   }),
@@ -43,13 +66,30 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState("all");
 
+  // Edit state
+  const [editSession, setEditSession] = useState<Session | null>(null);
+  const [editNotes, setEditNotes] = useState("");
+  const [editEffort, setEditEffort] = useState(0);
+  const [editUnderstanding, setEditUnderstanding] = useState(0);
+  const [editEngagement, setEditEngagement] = useState(0);
+  const [editDate, setEditDate] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // Delete state
+  const [deleteSession, setDeleteSession] = useState<Session | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  function loadSessions() {
+    getSessions().then(setSessions).finally(() => setLoading(false));
+  }
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
       navigate({ to: "/login" });
       return;
     }
-    getSessions().then(setSessions).finally(() => setLoading(false));
+    loadSessions();
   }, [user, authLoading, navigate]);
 
   const studentNames = useMemo(() => {
@@ -73,6 +113,53 @@ function DashboardPage() {
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  function openEdit(s: Session) {
+    setEditSession(s);
+    setEditNotes(s.notes ?? "");
+    setEditEffort(s.effort);
+    setEditUnderstanding(s.understanding);
+    setEditEngagement(s.engagement);
+    setEditDate(s.date);
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editSession) return;
+    setEditSubmitting(true);
+    const { error } = await supabase
+      .from("sessions")
+      .update({
+        notes: editNotes,
+        effort: editEffort,
+        understanding: editUnderstanding,
+        engagement: editEngagement,
+        date: editDate,
+      })
+      .eq("id", editSession.id);
+    if (error) {
+      toast.error("Failed to update session.");
+    } else {
+      toast.success("Session updated!");
+      setEditSession(null);
+      loadSessions();
+    }
+    setEditSubmitting(false);
+  }
+
+  async function handleDelete() {
+    if (!deleteSession) return;
+    setDeleting(true);
+    const { error } = await supabase.from("sessions").delete().eq("id", deleteSession.id);
+    if (error) {
+      toast.error("Failed to delete session.");
+    } else {
+      toast.success("Session deleted.");
+      setDeleteSession(null);
+      loadSessions();
+    }
+    setDeleting(false);
   }
 
   return (
@@ -153,7 +240,25 @@ function DashboardPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex shrink-0 flex-col gap-1.5 text-right">
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <div className="flex gap-1 mb-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={() => openEdit(s)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteSession(s)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground w-20">Effort</span>
                       <Stars count={s.effort} />
@@ -169,6 +274,56 @@ function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Edit Session Dialog */}
+      <Dialog open={!!editSession} onOpenChange={(open) => { if (!open) setEditSession(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Session</DialogTitle>
+          </DialogHeader>
+          {editSession && (
+            <form onSubmit={handleEdit} className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{editSession.student_name}</span> · {editSession.subject}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Date</Label>
+                <Input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Notes</Label>
+                <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <StarRating label="Effort" value={editEffort} onChange={setEditEffort} />
+                <StarRating label="Understanding" value={editUnderstanding} onChange={setEditUnderstanding} />
+                <StarRating label="Engagement" value={editEngagement} onChange={setEditEngagement} />
+              </div>
+              <Button type="submit" className="w-full" disabled={editSubmitting}>
+                {editSubmitting ? "Saving…" : "Save Changes"}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteSession} onOpenChange={(open) => { if (!open) setDeleteSession(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Session</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the session for <span className="font-medium">{deleteSession?.student_name}</span> on {deleteSession?.date}? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
