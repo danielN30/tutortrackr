@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { AppHeader } from "../components/AppHeader";
 import { StarRating } from "../components/StarRating";
 import { TopicTable, type TopicEntry } from "../components/TopicTable";
 import { addSession } from "../lib/sessions";
@@ -36,7 +35,7 @@ function IndexPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -113,59 +112,54 @@ function SessionForm({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <main className="mx-auto max-w-xl px-4 py-10">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Log a Session</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-1.5">
-                <Label>Student</Label>
-                {studentsLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading students…
-                  </div>
-                ) : students.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-2">
-                    No students added yet.{" "}
-                    <Link to="/students" className="text-primary underline underline-offset-2 hover:text-primary/80">
-                      Add a student
-                    </Link>
-                  </p>
-                ) : (
-                  <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a student" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {students.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name} · {s.subject}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="date">Date</Label>
-                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-              </div>
-              <TopicTable topics={topics} onChange={setTopics} />
-              <div className="grid grid-cols-2 gap-4">
-                <StarRating label="Effort" value={effort} onChange={setEffort} />
-                <StarRating label="Engagement" value={engagement} onChange={setEngagement} />
-              </div>
-              <Button type="submit" className="w-full" disabled={!canSubmit}>
-                {submitting ? "Saving…" : "Submit Session"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </main>
+    <div className="mx-auto max-w-xl px-6 py-8">
+      <h1 className="text-2xl font-semibold text-foreground mb-6">Log a Session</h1>
+      <Card className="shadow-sm">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label>Student</Label>
+              {studentsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Loading students…
+                </div>
+              ) : students.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  No students added yet.{" "}
+                  <Link to="/students" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                    Add a student
+                  </Link>
+                </p>
+              ) : (
+                <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a student" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name} · {s.subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <TopicTable topics={topics} onChange={setTopics} />
+            <div className="grid grid-cols-2 gap-4">
+              <StarRating label="Effort" value={effort} onChange={setEffort} />
+              <StarRating label="Engagement" value={engagement} onChange={setEngagement} />
+            </div>
+            <Button type="submit" className="w-full" disabled={!canSubmit}>
+              {submitting ? "Saving…" : "Submit Session"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
