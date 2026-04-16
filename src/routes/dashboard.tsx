@@ -144,7 +144,7 @@ function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {students.map((st) => (
-                  <Link key={st.id} to="/students/$studentId" params={{ studentId: st.id }}>
+                  <Link key={st.id} to="/students/$studentId" params={{ studentId: encodeURIComponent(st.name) }}>
                     <Card className="transition-colors hover:bg-accent/50 cursor-pointer">
                       <CardContent className="flex items-center justify-between py-3">
                         <div>
