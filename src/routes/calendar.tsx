@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { AppHeader } from "../components/AppHeader";
 import { ScheduleSessionDialog } from "../components/ScheduleSessionDialog";
 import { SessionDetailDialog } from "../components/SessionDetailDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,7 +128,7 @@ function CalendarPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -139,87 +138,83 @@ function CalendarPage() {
   const month = currentDate.getMonth();
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigateCalendar(-1)}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-xl font-semibold text-foreground min-w-[180px] text-center">
-              {view === "month"
-                ? `${MONTH_NAMES[month]} ${year}`
-                : (() => {
-                    const days = getWeekDays(currentDate);
-                    return `${days[0].date} — ${days[6].date}`;
-                  })()}
-            </h1>
-            <Button variant="ghost" size="icon" onClick={() => navigateCalendar(1)}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Select value={studentFilter} onValueChange={setStudentFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="All Students" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Students</SelectItem>
-                {students.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex rounded-md border border-border">
-              <Button
-                variant={view === "week" ? "default" : "ghost"}
-                size="sm"
-                className="rounded-r-none"
-                onClick={() => setView("week")}
-              >
-                Week
-              </Button>
-              <Button
-                variant={view === "month" ? "default" : "ghost"}
-                size="sm"
-                className="rounded-l-none"
-                onClick={() => setView("month")}
-              >
-                Month
-              </Button>
-            </div>
-            <Button size="sm" onClick={() => openSchedule()}>
-              <Plus className="h-4 w-4 mr-1" /> Schedule
-            </Button>
-          </div>
+    <div className="px-6 py-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigateCalendar(-1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-xl font-semibold text-foreground min-w-[180px] text-center">
+            {view === "month"
+              ? `${MONTH_NAMES[month]} ${year}`
+              : (() => {
+                  const days = getWeekDays(currentDate);
+                  return `${days[0].date} — ${days[6].date}`;
+                })()}
+          </h1>
+          <Button variant="ghost" size="icon" onClick={() => navigateCalendar(1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="flex items-center gap-2">
+          <Select value={studentFilter} onValueChange={setStudentFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="All Students" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Students</SelectItem>
+              {students.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex rounded-lg border border-border">
+            <Button
+              variant={view === "week" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-r-none"
+              onClick={() => setView("week")}
+            >
+              Week
+            </Button>
+            <Button
+              variant={view === "month" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-l-none"
+              onClick={() => setView("month")}
+            >
+              Month
+            </Button>
           </div>
-        ) : view === "month" ? (
-          <MonthView
-            year={year}
-            month={month}
-            today={today}
-            sessionsByDate={sessionsByDate}
-            onDayClick={openSchedule}
-            onSessionClick={openDetail}
-          />
-        ) : (
-          <WeekView
-            currentDate={currentDate}
-            today={today}
-            sessionsByDate={sessionsByDate}
-            onSlotClick={openSchedule}
-            onSessionClick={openDetail}
-          />
-        )}
-      </main>
+          <Button size="sm" onClick={() => openSchedule()}>
+            <Plus className="h-4 w-4 mr-1" /> Schedule
+          </Button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : view === "month" ? (
+        <MonthView
+          year={year}
+          month={month}
+          today={today}
+          sessionsByDate={sessionsByDate}
+          onDayClick={openSchedule}
+          onSessionClick={openDetail}
+        />
+      ) : (
+        <WeekView
+          currentDate={currentDate}
+          today={today}
+          sessionsByDate={sessionsByDate}
+          onSlotClick={openSchedule}
+          onSessionClick={openDetail}
+        />
+      )}
 
       <ScheduleSessionDialog
         open={scheduleOpen}
@@ -239,7 +234,6 @@ function CalendarPage() {
   );
 }
 
-/* ── Month View ── */
 function MonthView({
   year,
   month,
@@ -259,7 +253,7 @@ function MonthView({
   const dayHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardContent className="p-0">
         <div className="grid grid-cols-7">
           {dayHeaders.map((d) => (
@@ -294,7 +288,7 @@ function MonthView({
                     <button
                       key={s.id}
                       onClick={(e) => { e.stopPropagation(); onSessionClick(s); }}
-                      className={`w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] font-medium text-white transition-opacity hover:opacity-80 ${
+                      className={`w-full truncate rounded-md px-1.5 py-0.5 text-left text-[11px] font-medium text-white transition-opacity hover:opacity-80 ${
                         s.status === "scheduled" ? "bg-session-scheduled" : "bg-session-completed"
                       }`}
                     >
@@ -316,7 +310,6 @@ function MonthView({
   );
 }
 
-/* ── Week View ── */
 function WeekView({
   currentDate,
   today,
@@ -331,13 +324,12 @@ function WeekView({
   onSessionClick: (s: CalendarSession) => void;
 }) {
   const days = getWeekDays(currentDate);
-  const hours = Array.from({ length: 14 }, (_, i) => i + 7); // 7am–8pm
+  const hours = Array.from({ length: 14 }, (_, i) => i + 7);
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardContent className="p-0 overflow-x-auto">
         <div className="grid grid-cols-[60px_repeat(7,1fr)] min-w-[700px]">
-          {/* Header row */}
           <div className="border-b border-r border-border" />
           {days.map((d) => (
             <div
@@ -347,17 +339,12 @@ function WeekView({
               }`}
             >
               <p className="text-xs text-muted-foreground">{d.dayName}</p>
-              <p
-                className={`text-sm font-medium ${
-                  d.isToday ? "text-primary" : "text-foreground"
-                }`}
-              >
+              <p className={`text-sm font-medium ${d.isToday ? "text-primary" : "text-foreground"}`}>
                 {d.dayNum}
               </p>
             </div>
           ))}
 
-          {/* Time slots */}
           {hours.map((hour) => (
             <>
               <div
@@ -385,7 +372,7 @@ function WeekView({
                       <button
                         key={s.id}
                         onClick={(e) => { e.stopPropagation(); onSessionClick(s); }}
-                        className={`w-full truncate rounded px-1 py-0.5 text-[11px] font-medium text-white mb-0.5 text-left hover:opacity-80 ${
+                        className={`w-full truncate rounded-md px-1 py-0.5 text-[11px] font-medium text-white mb-0.5 text-left hover:opacity-80 ${
                           s.status === "scheduled" ? "bg-session-scheduled" : "bg-session-completed"
                         }`}
                       >

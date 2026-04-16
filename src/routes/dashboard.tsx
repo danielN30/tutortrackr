@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { AppHeader } from "../components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
 import { Users, CalendarDays, Clock, Loader2 } from "lucide-react";
@@ -46,7 +45,6 @@ function DashboardPage() {
       const studentList = studentsRes.data ?? [];
       const sessionList = sessionsRes.data ?? [];
 
-      // Calculate sessions this week
       const now = new Date();
       const startOfWeek = new Date(now);
       startOfWeek.setDate(now.getDate() - now.getDay());
@@ -56,7 +54,6 @@ function DashboardPage() {
       ).length;
       setWeekSessions(weekCount);
 
-      // Map students with their last session date
       const lastSessionMap = new Map<string, string>();
       for (const s of sessionList) {
         if (!s.student_id) continue;
@@ -73,7 +70,6 @@ function DashboardPage() {
         lastSessionDate: lastSessionMap.get(st.id) ?? null,
       }));
 
-      // Sort: null (never had session) first, then oldest session date first
       enriched.sort((a, b) => {
         if (!a.lastSessionDate && !b.lastSessionDate) return 0;
         if (!a.lastSessionDate) return -1;
@@ -90,84 +86,83 @@ function DashboardPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <main className="mx-auto max-w-3xl px-4 py-10">
-        <h1 className="text-xl font-semibold text-foreground mb-6">Dashboard</h1>
+    <div className="px-6 py-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-semibold text-foreground mb-8">Dashboard</h1>
 
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <>
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
+            <Card className="shadow-sm">
+              <CardContent className="flex items-center gap-4 py-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-foreground">{students.length}</p>
+                  <p className="text-sm text-muted-foreground">Active Students</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="shadow-sm">
+              <CardContent className="flex items-center gap-4 py-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
+                  <CalendarDays className="h-6 w-6 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-foreground">{weekSessions}</p>
+                  <p className="text-sm text-muted-foreground">Sessions This Week</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        ) : (
-          <>
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <Card>
-                <CardContent className="flex items-center gap-3 py-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Users className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{students.length}</p>
-                    <p className="text-xs text-muted-foreground">Active Students</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex items-center gap-3 py-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <CalendarDays className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{weekSessions}</p>
-                    <p className="text-xs text-muted-foreground">Sessions This Week</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Students sorted by longest without session */}
-            <h2 className="text-sm font-medium text-muted-foreground mb-3">Students — Needs Attention</h2>
-            {students.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                No students added yet.{" "}
-                <Link to="/students" className="text-primary hover:underline">Add a student</Link>
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {students.map((st) => (
-                  <Link key={st.id} to="/students/$studentId" params={{ studentId: encodeURIComponent(st.name) }}>
-                    <Card className="transition-colors hover:bg-accent/50 cursor-pointer">
-                      <CardContent className="flex items-center justify-between py-3">
-                        <div>
-                          <p className="font-medium text-foreground text-sm">{st.name}</p>
-                          <p className="text-xs text-muted-foreground">{st.subject}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          {st.lastSessionDate ? (
-                            <span>Last: {st.lastSessionDate}</span>
-                          ) : (
-                            <span className="text-destructive">No sessions yet</span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </main>
+          {/* Needs Attention */}
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            Needs Attention
+          </h2>
+          {students.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No students added yet.{" "}
+              <Link to="/students" className="text-primary hover:underline">Add a student</Link>
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {students.map((st) => (
+                <Link key={st.id} to="/students/$studentId" params={{ studentId: encodeURIComponent(st.name) }}>
+                  <Card className="shadow-sm transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
+                    <CardContent className="flex items-center justify-between py-4">
+                      <div>
+                        <p className="font-medium text-foreground">{st.name}</p>
+                        <p className="text-xs text-muted-foreground">{st.subject}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        {st.lastSessionDate ? (
+                          <span>Last: {st.lastSessionDate}</span>
+                        ) : (
+                          <span className="text-destructive font-medium">No sessions yet</span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
