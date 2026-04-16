@@ -7,8 +7,24 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Users } from "lucide-react";
+import { Loader2, UserPlus, Users, Pencil, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/students/")({
   head: () => ({
@@ -38,6 +54,17 @@ function StudentsPage() {
   const [subject, setSubject] = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Edit state
+  const [editStudent, setEditStudent] = useState<Student | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editSubject, setEditSubject] = useState("");
+  const [editParentEmail, setEditParentEmail] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // Delete state
+  const [deleteStudent, setDeleteStudent] = useState<Student | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function loadStudents() {
     const { data, error } = await supabase
@@ -88,6 +115,49 @@ function StudentsPage() {
       loadStudents();
     }
     setSubmitting(false);
+  }
+
+  function openEdit(s: Student) {
+    setEditStudent(s);
+    setEditName(s.name);
+    setEditSubject(s.subject);
+    setEditParentEmail(s.parent_email);
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editStudent || !editName.trim() || !editSubject.trim() || !editParentEmail.trim()) return;
+    setEditSubmitting(true);
+    const { error } = await supabase
+      .from("students")
+      .update({
+        name: editName.trim(),
+        subject: editSubject.trim(),
+        parent_email: editParentEmail.trim(),
+      })
+      .eq("id", editStudent.id);
+    if (error) {
+      toast.error("Failed to update student.");
+    } else {
+      toast.success("Student updated!");
+      setEditStudent(null);
+      loadStudents();
+    }
+    setEditSubmitting(false);
+  }
+
+  async function handleDelete() {
+    if (!deleteStudent) return;
+    setDeleting(true);
+    const { error } = await supabase.from("students").delete().eq("id", deleteStudent.id);
+    if (error) {
+      toast.error("Failed to delete student.");
+    } else {
+      toast.success("Student deleted.");
+      setDeleteStudent(null);
+      loadStudents();
+    }
+    setDeleting(false);
   }
 
   return (
@@ -145,22 +215,86 @@ function StudentsPage() {
         ) : (
           <div className="space-y-3">
             {students.map((s) => (
-              <Link key={s.id} to="/students/$studentId" params={{ studentId: encodeURIComponent(s.name) }} className="block">
-                <Card className="transition-colors hover:bg-accent/40 cursor-pointer">
-                  <CardContent className="py-4">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-medium text-foreground">{s.name}</span>
-                      <span className="text-sm text-muted-foreground">·</span>
-                      <span className="text-sm text-muted-foreground">{s.subject}</span>
+              <Card key={s.id} className="transition-colors hover:bg-accent/40">
+                <CardContent className="py-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link to="/students/$studentId" params={{ studentId: encodeURIComponent(s.name) }} className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-medium text-foreground">{s.name}</span>
+                        <span className="text-sm text-muted-foreground">·</span>
+                        <span className="text-sm text-muted-foreground">{s.subject}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{s.parent_email}</p>
+                    </Link>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={(e) => { e.preventDefault(); openEdit(s); }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={(e) => { e.preventDefault(); setDeleteStudent(s); }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{s.parent_email}</p>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
       </main>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editStudent} onOpenChange={(open) => { if (!open) setEditStudent(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Student</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Student Name</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Subject</Label>
+              <Input value={editSubject} onChange={(e) => setEditSubject(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Parent Email</Label>
+              <Input type="email" value={editParentEmail} onChange={(e) => setEditParentEmail(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full" disabled={!editName.trim() || !editSubject.trim() || !editParentEmail.trim() || editSubmitting}>
+              {editSubmitting ? "Saving…" : "Save Changes"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteStudent} onOpenChange={(open) => { if (!open) setDeleteStudent(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Student</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-medium">{deleteStudent?.name}</span>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
