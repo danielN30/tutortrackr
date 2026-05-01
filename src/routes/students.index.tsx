@@ -95,11 +95,14 @@ function StudentsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const parsed = studentInputSchema.safeParse({ name, subject, parent_email: parentEmail });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.from("students").insert({
-      name: name.trim(),
-      subject: subject.trim(),
-      parent_email: parentEmail.trim(),
+      ...parsed.data,
       user_id: user!.id,
     });
     if (error) {
