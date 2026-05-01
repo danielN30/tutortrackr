@@ -12,14 +12,38 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
-    const { studentName, subject, notes, effort, understanding, engagement, userId } =
+    // --- Authenticate caller ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const publishableKey =
+      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
+      Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, publishableKey);
+    const { data: userData, error: userErr } = await authClient.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const authUserId = userData.user.id;
+
+    const { studentName, subject, notes, effort, understanding, engagement } =
       await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Fetch last 3 sessions for this student (excluding the current one being saved)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    // Fetch last 3 sessions for this student (scoped to the authenticated user)
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -27,9 +51,10 @@ serve(async (req) => {
       .from("sessions")
       .select("date, notes, effort, understanding, engagement, subject")
       .eq("student_name", studentName)
-      .eq("user_id", userId)
+      .eq("user_id", authUserId)
       .order("date", { ascending: false })
       .limit(3);
+
 
     // --- Generate single-session summary ---
     const summaryPrompt = `You are writing a progress update on behalf of a tutor to a parent. Your tone should be warm, professional and personal — like a thoughtful tutor writing a note, not a system generating a report. Using the session details below, write a 3-4 sentence parent-facing summary. Be specific to what was actually covered. Mention effort, understanding and engagement naturally within the sentences rather than listing them. End with one encouraging sentence about the student. Student: ${studentName} Subject: ${subject} Session notes: ${notes || "No notes provided"} Effort rating: ${effort}/5 Understanding rating: ${understanding}/5 Engagement rating: ${engagement}/5. Write only the summary. No headings, no bullet points, no preamble.`;
