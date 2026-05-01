@@ -27,6 +27,18 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  function friendlyError(msg: string): string {
+    const m = msg.toLowerCase();
+    if (m.includes("invalid login credentials")) return "Invalid email or password.";
+    if (m.includes("email not confirmed")) return "Please check your email to confirm your account before signing in.";
+    if (m.includes("already registered") || m.includes("user already")) return "An account with this email already exists. Try signing in instead.";
+    if (m.includes("password") && m.includes("short")) return "Password must be at least 6 characters.";
+    if (m.includes("pwned") || m.includes("compromised") || m.includes("breach")) return "This password has appeared in a known data breach. Please choose a different one.";
+    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Please wait a moment and try again.";
+    if (m.includes("invalid email")) return "Please enter a valid email address.";
+    return msg;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
@@ -37,7 +49,7 @@ function LoginPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
-        toast.error(error.message);
+        toast.error(friendlyError(error.message));
       } else {
         toast.success("Check your email for a password reset link.");
         setMode("signin");
@@ -51,14 +63,16 @@ function LoginPage() {
     if (mode === "signup") {
       const { error } = await signUp(email.trim(), password);
       if (error) {
-        toast.error(error);
+        toast.error(friendlyError(error));
       } else {
-        toast.success("Check your email to confirm your account!");
+        // Auto-confirm is enabled — user is signed in immediately
+        toast.success("Account created! Welcome to TutorTrack.");
+        navigate({ to: "/" });
       }
     } else {
       const { error } = await signIn(email.trim(), password);
       if (error) {
-        toast.error(error);
+        toast.error(friendlyError(error));
       } else {
         navigate({ to: "/" });
       }
