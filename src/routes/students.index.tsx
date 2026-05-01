@@ -127,11 +127,16 @@ function StudentsPage() {
 
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editStudent || !editName.trim() || !editSubject.trim() || !editParentEmail.trim()) return;
+    if (!editStudent) return;
+    const parsed = studentInputSchema.safeParse({ name: editName, subject: editSubject, parent_email: editParentEmail });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
     setEditSubmitting(true);
     const { error } = await supabase
       .from("students")
-      .update({ name: editName.trim(), subject: editSubject.trim(), parent_email: editParentEmail.trim() })
+      .update(parsed.data)
       .eq("id", editStudent.id);
     if (error) {
       toast.error("Failed to update student.");
