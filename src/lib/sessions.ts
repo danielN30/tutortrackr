@@ -57,7 +57,6 @@ export async function addSession(session: {
           effort: session.effort,
           understanding: session.understanding,
           engagement: session.engagement,
-          userId: session.user_id,
         },
       }
     );
