@@ -24,6 +24,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Users, Pencil, Trash2 } from "lucide-react";
+import { studentInputSchema } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/students/")({
   head: () => ({
@@ -94,11 +95,14 @@ function StudentsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const parsed = studentInputSchema.safeParse({ name, subject, parent_email: parentEmail });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.from("students").insert({
-      name: name.trim(),
-      subject: subject.trim(),
-      parent_email: parentEmail.trim(),
+      ...parsed.data,
       user_id: user!.id,
     });
     if (error) {
@@ -123,11 +127,16 @@ function StudentsPage() {
 
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editStudent || !editName.trim() || !editSubject.trim() || !editParentEmail.trim()) return;
+    if (!editStudent) return;
+    const parsed = studentInputSchema.safeParse({ name: editName, subject: editSubject, parent_email: editParentEmail });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
     setEditSubmitting(true);
     const { error } = await supabase
       .from("students")
-      .update({ name: editName.trim(), subject: editSubject.trim(), parent_email: editParentEmail.trim() })
+      .update(parsed.data)
       .eq("id", editStudent.id);
     if (error) {
       toast.error("Failed to update student.");

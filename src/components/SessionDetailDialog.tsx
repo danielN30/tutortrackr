@@ -95,7 +95,6 @@ export function SessionDetailDialog({ open, onOpenChange, session, onUpdated }: 
               effort,
               understanding: 0,
               engagement,
-              userId: session.user_id,
             },
           }
         );
