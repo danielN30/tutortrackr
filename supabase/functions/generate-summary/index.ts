@@ -32,16 +32,7 @@ serve(async (req) => {
       .limit(3);
 
     // --- Generate single-session summary ---
-    const summaryPrompt = `You are a tutor writing a brief, honest summary for a parent about their child's tutoring session. Keep it to 2-3 sentences. Be informative and encouraging but avoid being overly enthusiastic or using excessive praise. Focus on what was covered, how the student performed, and any areas to keep working on.
-
-Student: ${studentName}
-Subject: ${subject}
-Session Notes: ${notes || "No notes provided"}
-Effort: ${effort}/5
-Understanding: ${understanding}/5
-Engagement: ${engagement}/5
-
-Write a calm, informative parent summary.`;
+    const summaryPrompt = `You are writing a progress update on behalf of a tutor to a parent. Your tone should be warm, professional and personal — like a thoughtful tutor writing a note, not a system generating a report. Using the session details below, write a 3-4 sentence parent-facing summary. Be specific to what was actually covered. Mention effort, understanding and engagement naturally within the sentences rather than listing them. End with one encouraging sentence about the student. Student: ${studentName} Subject: ${subject} Session notes: ${notes || "No notes provided"} Effort rating: ${effort}/5 Understanding rating: ${understanding}/5 Engagement rating: ${engagement}/5. Write only the summary. No headings, no bullet points, no preamble.`;
 
     const aiCall = async (systemMsg: string, userMsg: string) => {
       const response = await fetch(
@@ -82,22 +73,18 @@ Write a calm, informative parent summary.`;
     // --- Generate multi-session recommendation ---
     let recommendation: string | null = null;
 
-    // Include current session + recent sessions (up to 3 total history)
+    // Include current session + recent sessions (up to 3 total)
     const allSessions = [
-      { date: "Current session", notes, effort, understanding, engagement, subject },
+      { notes, effort, understanding, engagement, subject },
       ...(recentSessions || []),
-    ];
+    ].slice(0, 3);
 
     if (allSessions.length >= 2) {
-      const sessionsText = allSessions
-        .map((s, i) => `Session ${i + 1} (${s.date}): Subject: ${s.subject}, Notes: ${s.notes || "None"}, Effort: ${s.effort}/5, Understanding: ${s.understanding}/5, Engagement: ${s.engagement}/5`)
-        .join("\n");
+      const s1 = allSessions[0];
+      const s2 = allSessions[1];
+      const s3: any = allSessions[2] ?? { notes: "N/A", effort: "N/A", understanding: "N/A", engagement: "N/A" };
 
-      const recPrompt = `Based on the following recent tutoring sessions for ${studentName}, identify patterns across sessions and suggest 1-2 specific focus areas for the student going forward. Be concise (2-3 sentences), constructive and actionable.
-
-${sessionsText}
-
-Write ongoing recommendations.`;
+      const recPrompt = `You are an experienced tutor reviewing a student's recent sessions to identify patterns and give specific guidance to parents. Based on the last 3 sessions below, write 2-3 sentences of specific, actionable recommendations. Focus on what the student should work on before the next session. Be encouraging in tone. Reference actual topics or patterns from the notes — never give generic advice. Student: ${studentName} Subject: ${subject} Session 1: ${s1.notes || "None"} | Effort: ${s1.effort}/5 | Understanding: ${s1.understanding}/5 | Engagement: ${s1.engagement}/5 Session 2: ${s2.notes || "None"} | Effort: ${s2.effort}/5 | Understanding: ${s2.understanding}/5 | Engagement: ${s2.engagement}/5 Session 3: ${s3.notes || "None"} | Effort: ${s3.effort}/5 | Understanding: ${s3.understanding}/5 | Engagement: ${s3.engagement}/5. Write only the recommendations. No headings, no bullet points, no preamble.`;
 
       try {
         recommendation = await aiCall(
