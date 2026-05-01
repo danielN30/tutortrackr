@@ -24,6 +24,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Users, Pencil, Trash2 } from "lucide-react";
+import { studentInputSchema } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/students/")({
   head: () => ({
