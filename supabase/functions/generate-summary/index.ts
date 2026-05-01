@@ -32,16 +32,7 @@ serve(async (req) => {
       .limit(3);
 
     // --- Generate single-session summary ---
-    const summaryPrompt = `You are a tutor writing a brief, honest summary for a parent about their child's tutoring session. Keep it to 2-3 sentences. Be informative and encouraging but avoid being overly enthusiastic or using excessive praise. Focus on what was covered, how the student performed, and any areas to keep working on.
-
-Student: ${studentName}
-Subject: ${subject}
-Session Notes: ${notes || "No notes provided"}
-Effort: ${effort}/5
-Understanding: ${understanding}/5
-Engagement: ${engagement}/5
-
-Write a calm, informative parent summary.`;
+    const summaryPrompt = `You are writing a progress update on behalf of a tutor to a parent. Your tone should be warm, professional and personal — like a thoughtful tutor writing a note, not a system generating a report. Using the session details below, write a 3-4 sentence parent-facing summary. Be specific to what was actually covered. Mention effort, understanding and engagement naturally within the sentences rather than listing them. End with one encouraging sentence about the student. Student: ${studentName} Subject: ${subject} Session notes: ${notes || "No notes provided"} Effort rating: ${effort}/5 Understanding rating: ${understanding}/5 Engagement rating: ${engagement}/5. Write only the summary. No headings, no bullet points, no preamble.`;
 
     const aiCall = async (systemMsg: string, userMsg: string) => {
       const response = await fetch(
