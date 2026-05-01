@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Star, Plus, X } from "lucide-react";
+import { topicSchema } from "@/lib/sanitize";
+import { toast } from "sonner";
 
 export interface TopicEntry {
   topic: string;
@@ -17,8 +19,12 @@ export function TopicTable({ topics, onChange }: TopicTableProps) {
   const [newTopic, setNewTopic] = useState("");
 
   function addTopic() {
-    if (!newTopic.trim()) return;
-    onChange([...topics, { topic: newTopic.trim(), rating: 0 }]);
+    const parsed = topicSchema.safeParse(newTopic);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid topic");
+      return;
+    }
+    onChange([...topics, { topic: parsed.data, rating: 0 }]);
     setNewTopic("");
   }
 
