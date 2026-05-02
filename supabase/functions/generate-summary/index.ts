@@ -137,7 +137,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
-    if (e?.status === 429 || e?.status === 402) {
+    if (e?.status === 429 || e?.status === 402 || e?.status === 504) {
       return new Response(
         JSON.stringify({ error: e.message }),
         { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
