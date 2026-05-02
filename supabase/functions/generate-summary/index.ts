@@ -60,34 +60,46 @@ serve(async (req) => {
     const summaryPrompt = `You are writing a progress update on behalf of a tutor to a parent. Your tone should be warm, professional and personal — like a thoughtful tutor writing a note, not a system generating a report. Using the session details below, write a 3-4 sentence parent-facing summary. Be specific to what was actually covered. Mention effort, understanding and engagement naturally within the sentences rather than listing them. End with one encouraging sentence about the student. Student: ${studentName} Subject: ${subject} Session notes: ${notes || "No notes provided"} Effort rating: ${effort}/5 Understanding rating: ${understanding}/5 Engagement rating: ${engagement}/5. Write only the summary. No headings, no bullet points, no preamble.`;
 
     const aiCall = async (systemMsg: string, userMsg: string) => {
-      const response = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              { role: "system", content: systemMsg },
-              { role: "user", content: userMsg },
-            ],
-          }),
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
+      try {
+        const response = await fetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                { role: "system", content: systemMsg },
+                { role: "user", content: userMsg },
+              ],
+            }),
+            signal: controller.signal,
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 429) throw { status: 429, message: "Rate limited" };
+          if (response.status === 402) throw { status: 402, message: "Credits exhausted" };
+          const text = await response.text();
+          console.error("AI gateway error:", response.status, text);
+          throw new Error("AI gateway error");
         }
-      );
 
-      if (!response.ok) {
-        if (response.status === 429) throw { status: 429, message: "Rate limited" };
-        if (response.status === 402) throw { status: 402, message: "Credits exhausted" };
-        const text = await response.text();
-        console.error("AI gateway error:", response.status, text);
-        throw new Error("AI gateway error");
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content?.trim() || null;
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          throw { status: 504, message: "AI request timed out after 30 seconds" };
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeout);
       }
-
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content?.trim() || null;
     };
 
     const summary = await aiCall(
@@ -125,7 +137,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
-    if (e?.status === 429 || e?.status === 402) {
+    if (e?.status === 429 || e?.status === 402 || e?.status === 504) {
       return new Response(
         JSON.stringify({ error: e.message }),
         { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

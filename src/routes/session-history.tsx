@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getSessions, type Session } from "../lib/sessions";
+import { type Session } from "../lib/sessions";
 import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -58,11 +58,16 @@ function Stars({ count }: { count: number }) {
   );
 }
 
+const PAGE_SIZE = 10;
+
 function SessionHistoryPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
   const [selectedStudent, setSelectedStudent] = useState("all");
 
   const [editSession, setEditSession] = useState<Session | null>(null);
@@ -76,9 +81,42 @@ function SessionHistoryPage() {
   const [deleteSession, setDeleteSession] = useState<Session | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  function loadSessions() {
-    getSessions().then(setSessions).finally(() => setLoading(false));
-  }
+  const fetchPage = useCallback(
+    async (pageIndex: number, replace: boolean) => {
+      if (!user) return;
+      const from = pageIndex * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, error } = await supabase
+        .from("sessions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+      if (error) {
+        toast.error("Failed to load sessions.");
+        return;
+      }
+      const rows = (data ?? []) as Session[];
+      setHasMore(rows.length === PAGE_SIZE);
+      setSessions((prev) => (replace ? rows : [...prev, ...rows]));
+      setPage(pageIndex);
+    },
+    [user]
+  );
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    await fetchPage(0, true);
+    setLoading(false);
+  }, [fetchPage]);
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchPage(page + 1, false);
+    setLoadingMore(false);
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -86,8 +124,9 @@ function SessionHistoryPage() {
       navigate({ to: "/login" });
       return;
     }
-    loadSessions();
-  }, [user, authLoading, navigate]);
+    reload();
+  }, [user, authLoading, navigate, reload]);
+
 
   const studentNames = useMemo(() => {
     const names = new Set(sessions.map((s) => s.student_name));
@@ -140,7 +179,7 @@ function SessionHistoryPage() {
     } else {
       toast.success("Session updated!");
       setEditSession(null);
-      loadSessions();
+      reload();
     }
     setEditSubmitting(false);
   }
@@ -154,7 +193,7 @@ function SessionHistoryPage() {
     } else {
       toast.success("Session deleted.");
       setDeleteSession(null);
-      loadSessions();
+      reload();
     }
     setDeleting(false);
   }
@@ -254,6 +293,17 @@ function SessionHistoryPage() {
               </CardContent>
             </Card>
           ))}
+          {hasMore && selectedStudent === "all" && (
+            <div className="pt-2 flex justify-center">
+              <Button variant="outline" size="sm" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? (
+                  <><Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> Loading…</>
+                ) : (
+                  "Load more"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
