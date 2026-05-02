@@ -78,7 +78,7 @@ export function ScheduleSessionDialog({ open, onOpenChange, defaultDate, userId,
 
     setSubmitting(false);
     if (error) {
-      toast.error("Failed to schedule session");
+      toast.error(error.message || "Failed to schedule session");
       return;
     }
     toast.success("Session scheduled!");
