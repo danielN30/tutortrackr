@@ -47,21 +47,32 @@ export async function addSession(session: {
   if (error) throw error;
 
   try {
-    const { data: fnData, error: fnError } = await supabase.functions.invoke(
-      "generate-summary",
-      {
-        body: {
-          studentName: session.student_name,
-          subject: session.subject,
-          notes: session.notes,
-          effort: session.effort,
-          understanding: session.understanding,
-          engagement: session.engagement,
-        },
-      }
+    const aiPromise = supabase.functions.invoke("generate-summary", {
+      body: {
+        studentName: session.student_name,
+        subject: session.subject,
+        notes: session.notes,
+        effort: session.effort,
+        understanding: session.understanding,
+        engagement: session.engagement,
+      },
+    });
+
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(
+        () => resolve({ data: null, error: new Error("AI request timed out after 30 seconds") }),
+        30_000
+      )
     );
 
-    if (!fnError && fnData) {
+    const { data: fnData, error: fnError } = await Promise.race([
+      aiPromise,
+      timeoutPromise,
+    ]);
+
+    if (fnError) {
+      console.warn("AI summary generation failed:", fnError.message);
+    } else if (fnData) {
       const updates: { parent_summary?: string; recommendation?: string } = {};
       if (fnData.summary) updates.parent_summary = fnData.summary;
       if (fnData.recommendation) updates.recommendation = fnData.recommendation;
