@@ -78,7 +78,9 @@ function RootComponent() {
   return (
     <AuthProvider>
       <AppLayout>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </AppLayout>
       <Toaster />
     </AuthProvider>
