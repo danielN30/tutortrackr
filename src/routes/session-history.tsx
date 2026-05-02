@@ -179,7 +179,7 @@ function SessionHistoryPage() {
     } else {
       toast.success("Session updated!");
       setEditSession(null);
-      loadSessions();
+      reload();
     }
     setEditSubmitting(false);
   }
@@ -193,7 +193,7 @@ function SessionHistoryPage() {
     } else {
       toast.success("Session deleted.");
       setDeleteSession(null);
-      loadSessions();
+      reload();
     }
     setDeleting(false);
   }
