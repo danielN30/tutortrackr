@@ -293,6 +293,17 @@ function SessionHistoryPage() {
               </CardContent>
             </Card>
           ))}
+          {hasMore && selectedStudent === "all" && (
+            <div className="pt-2 flex justify-center">
+              <Button variant="outline" size="sm" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? (
+                  <><Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> Loading…</>
+                ) : (
+                  "Load more"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
