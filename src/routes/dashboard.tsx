@@ -22,12 +22,28 @@ interface StudentWithLastSession {
   lastSessionDate: string | null;
 }
 
+// Module-level cache for dashboard data (persists across route navigations).
+const CACHE_TTL_MS = 60_000;
+let dashboardCache: {
+  userId: string;
+  expiresAt: number;
+  students: StudentWithLastSession[];
+  weekSessions: number;
+} | null = null;
+
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [students, setStudents] = useState<StudentWithLastSession[]>([]);
-  const [weekSessions, setWeekSessions] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [students, setStudents] = useState<StudentWithLastSession[]>(
+    () => (dashboardCache && dashboardCache.userId === (user?.id ?? "") ? dashboardCache.students : [])
+  );
+  const [weekSessions, setWeekSessions] = useState(
+    () => (dashboardCache && dashboardCache.userId === (user?.id ?? "") ? dashboardCache.weekSessions : 0)
+  );
+  const [loading, setLoading] = useState(() => {
+    if (!user) return true;
+    return !(dashboardCache && dashboardCache.userId === user.id && dashboardCache.expiresAt > Date.now());
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -36,23 +52,48 @@ function DashboardPage() {
       return;
     }
 
+    // Serve cached data instantly if fresh
+    if (
+      dashboardCache &&
+      dashboardCache.userId === user.id &&
+      dashboardCache.expiresAt > Date.now()
+    ) {
+      setStudents(dashboardCache.students);
+      setWeekSessions(dashboardCache.weekSessions);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     async function load() {
-      const [studentsRes, sessionsRes] = await Promise.all([
-        supabase.from("students").select("id, name, subject").order("name"),
-        supabase.from("sessions").select("student_id, date"),
+      // Only fetch the columns this page actually renders, scoped to current user.
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const startOfWeekIso = startOfWeek.toISOString().slice(0, 10);
+
+      const [studentsRes, sessionsRes, weekCountRes] = await Promise.all([
+        supabase
+          .from("students")
+          .select("id, name, subject")
+          .eq("user_id", user!.id)
+          .order("name"),
+        supabase
+          .from("sessions")
+          .select("student_id, date")
+          .eq("user_id", user!.id),
+        supabase
+          .from("sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user!.id)
+          .gte("date", startOfWeekIso),
       ]);
+
+      if (cancelled) return;
 
       const studentList = studentsRes.data ?? [];
       const sessionList = sessionsRes.data ?? [];
-
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
-      const weekCount = sessionList.filter(
-        (s) => new Date(s.date) >= startOfWeek
-      ).length;
-      setWeekSessions(weekCount);
+      const weekCount = weekCountRes.count ?? 0;
 
       const lastSessionMap = new Map<string, string>();
       for (const s of sessionList) {
@@ -77,11 +118,22 @@ function DashboardPage() {
         return a.lastSessionDate.localeCompare(b.lastSessionDate);
       });
 
+      dashboardCache = {
+        userId: user!.id,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+        students: enriched,
+        weekSessions: weekCount,
+      };
+
       setStudents(enriched);
+      setWeekSessions(weekCount);
       setLoading(false);
     }
 
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [user, authLoading, navigate]);
 
   if (authLoading || !user) {
