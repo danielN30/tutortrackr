@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getSessions, type Session } from "../lib/sessions";
+import { type Session } from "../lib/sessions";
 import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
