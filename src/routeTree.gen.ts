@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionHistoryRouteImport } from './routes/session-history'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
@@ -22,6 +23,11 @@ import { Route as StudentsStudentIdRouteImport } from './routes/students.$studen
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SessionHistoryRoute = SessionHistoryRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
+  '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/students/': typeof StudentsIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
+  '/settings': typeof SettingsRoute
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/students': typeof StudentsIndexRoute
 }
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
+  '/settings': typeof SettingsRoute
   '/students': typeof StudentsRouteWithChildren
   '/students/$studentId': typeof StudentsStudentIdRoute
   '/students/': typeof StudentsIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/session-history'
+    | '/settings'
     | '/students'
     | '/students/$studentId'
     | '/students/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/session-history'
+    | '/settings'
     | '/students/$studentId'
     | '/students'
   id:
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/session-history'
+    | '/settings'
     | '/students'
     | '/students/$studentId'
     | '/students/'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SessionHistoryRoute: typeof SessionHistoryRoute
+  SettingsRoute: typeof SettingsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
 }
 
@@ -150,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/students'
       preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/session-history': {
@@ -232,6 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SessionHistoryRoute: SessionHistoryRoute,
+  SettingsRoute: SettingsRoute,
   StudentsRoute: StudentsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
