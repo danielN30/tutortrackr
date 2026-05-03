@@ -21,6 +21,7 @@ import {
   MONTH_NAMES,
 } from "../lib/calendar-utils";
 import { ChevronLeft, ChevronRight, Plus, Loader2 } from "lucide-react";
+import { CalendarSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
