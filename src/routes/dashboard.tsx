@@ -150,9 +150,7 @@ function DashboardPage() {
       <h1 className="text-2xl font-semibold text-foreground mb-8">Dashboard</h1>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <DashboardSkeleton />
       ) : (
         <>
           {/* Stats */}
