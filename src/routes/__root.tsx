@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/AppLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 import appCss from "../styles.css?url";
 
@@ -82,6 +83,7 @@ function RootComponent() {
           <Outlet />
         </ErrorBoundary>
       </AppLayout>
+      <OnboardingTour />
       <Toaster />
     </AuthProvider>
   );

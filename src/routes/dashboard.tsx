@@ -155,7 +155,7 @@ function DashboardPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
+          <div data-tour="analytics" className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
             <Card className="shadow-sm">
               <CardContent className="flex items-center gap-4 py-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
