@@ -16,11 +16,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { to: "/dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-  { to: "/students" as const, label: "Students", icon: Users },
-  { to: "/" as const, label: "Log Session", icon: PenLine, exact: true },
+  { to: "/dashboard" as const, label: "Dashboard", icon: LayoutDashboard, tour: "nav-dashboard" },
+  { to: "/students" as const, label: "Students", icon: Users, tour: "nav-students" },
+  { to: "/" as const, label: "Log Session", icon: PenLine, exact: true, tour: "nav-log-session" },
   { to: "/calendar" as const, label: "Calendar", icon: CalendarDays },
-  { to: "/session-history" as const, label: "History", icon: History },
+  { to: "/session-history" as const, label: "History", icon: History, tour: "nav-history" },
+  { to: "/settings" as const, label: "Settings", icon: Settings },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
