@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Star, BookOpen, Loader2, Pencil, Trash2 } from "lucide-react";
+import { SessionListSkeleton } from "@/components/skeletons";
 import { StarRating } from "../components/StarRating";
 import {
   Select,
