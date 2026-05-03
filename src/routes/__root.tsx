@@ -83,6 +83,7 @@ function RootComponent() {
           <Outlet />
         </ErrorBoundary>
       </AppLayout>
+      <OnboardingTour />
       <Toaster />
     </AuthProvider>
   );
