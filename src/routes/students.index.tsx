@@ -24,6 +24,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Users, Pencil, Trash2 } from "lucide-react";
+import { StudentListSkeleton } from "@/components/skeletons";
 import { studentInputSchema } from "@/lib/sanitize";
 
 export const Route = createFileRoute("/students/")({
@@ -204,9 +205,7 @@ function StudentsPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <StudentListSkeleton />
       ) : students.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Users className="mb-3 h-10 w-10" />

@@ -21,6 +21,7 @@ import {
   MONTH_NAMES,
 } from "../lib/calendar-utils";
 import { ChevronLeft, ChevronRight, Plus, Loader2 } from "lucide-react";
+import { CalendarSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
@@ -194,9 +195,7 @@ function CalendarPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <CalendarSkeleton />
       ) : view === "month" ? (
         <MonthView
           year={year}

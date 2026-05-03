@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
 import { Users, CalendarDays, Clock, Loader2 } from "lucide-react";
+import { DashboardSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -149,9 +150,7 @@ function DashboardPage() {
       <h1 className="text-2xl font-semibold text-foreground mb-8">Dashboard</h1>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <DashboardSkeleton />
       ) : (
         <>
           {/* Stats */}

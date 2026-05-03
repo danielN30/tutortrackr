@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Star, BookOpen, Loader2, Pencil, Trash2 } from "lucide-react";
+import { SessionListSkeleton } from "@/components/skeletons";
 import { StarRating } from "../components/StarRating";
 import {
   Select,
@@ -233,9 +234,7 @@ function SessionHistoryPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <SessionListSkeleton />
       ) : sessions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <BookOpen className="mb-3 h-10 w-10" />
