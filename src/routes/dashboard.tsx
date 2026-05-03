@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "../components/ui/card";
 import { Users, CalendarDays, Clock, Loader2 } from "lucide-react";
+import { DashboardSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
