@@ -123,6 +123,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.to}
                     to={item.to}
+                    data-tour={item.tour}
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                       isActive
