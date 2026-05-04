@@ -47,6 +47,14 @@ const STEPS: TourStep[] = [
     placement: "right",
   },
   {
+    selector: '[data-tour="student-card"]',
+    title: "Student Analytics",
+    description:
+      "Click any student to view their detailed progress, session history, and AI summaries.",
+    route: "/students",
+    placement: "bottom",
+  },
+  {
     selector: '[data-tour="analytics"]',
     title: "Analytics",
     description:

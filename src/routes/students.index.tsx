@@ -213,8 +213,8 @@ function StudentsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {students.map((s) => (
-            <Card key={s.id} className="shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+          {students.map((s, idx) => (
+            <Card key={s.id} data-tour={idx === 0 ? "student-card" : undefined} className="shadow-sm transition-all hover:shadow-md hover:border-primary/20">
               <CardContent className="py-4">
                 <div className="flex items-start justify-between gap-2">
                   <Link to="/students/$studentId" params={{ studentId: encodeURIComponent(s.name) }} className="flex-1 min-w-0">
