@@ -14,6 +14,7 @@ export interface Session {
   status: string;
   parent_summary: string | null;
   recommendation: string | null;
+  summary_edited?: boolean;
   created_at: string;
   user_id: string | null;
   student_id: string | null;

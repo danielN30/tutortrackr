@@ -37,8 +37,10 @@ serve(async (req) => {
     }
     const authUserId = userData.user.id;
 
-    const { studentName, subject, notes, effort, understanding, engagement } =
+    const { studentName, subject, notes, effort, understanding, engagement, mode } =
       await req.json();
+    const wantSummary = mode !== "recommendation";
+    const wantRecommendation = mode !== "summary";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -102,10 +104,12 @@ serve(async (req) => {
       }
     };
 
-    const summary = await aiCall(
-      "You are a professional tutor assistant. Write concise, informative parent summaries. Be encouraging but measured — avoid exclamation marks and overly positive language. Focus on facts and gentle guidance.",
-      summaryPrompt
-    ) || "Summary unavailable.";
+    const summary = wantSummary
+      ? (await aiCall(
+          "You are a professional tutor assistant. Write concise, informative parent summaries. Be encouraging but measured — avoid exclamation marks and overly positive language. Focus on facts and gentle guidance.",
+          summaryPrompt
+        )) || "Summary unavailable."
+      : null;
 
     // --- Generate multi-session recommendation ---
     let recommendation: string | null = null;
@@ -116,7 +120,7 @@ serve(async (req) => {
       ...(recentSessions || []),
     ].slice(0, 3);
 
-    if (allSessions.length >= 2) {
+    if (wantRecommendation && allSessions.length >= 2) {
       const s1 = allSessions[0];
       const s2 = allSessions[1];
       const s3: any = allSessions[2] ?? { notes: "N/A", effort: "N/A", understanding: "N/A", engagement: "N/A" };

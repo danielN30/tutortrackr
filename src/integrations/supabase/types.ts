@@ -30,6 +30,7 @@ export type Database = {
           student_id: string | null
           student_name: string
           subject: string
+          summary_edited: boolean
           understanding: number
           user_id: string | null
         }
@@ -48,6 +49,7 @@ export type Database = {
           student_id?: string | null
           student_name: string
           subject: string
+          summary_edited?: boolean
           understanding: number
           user_id?: string | null
         }
@@ -66,6 +68,7 @@ export type Database = {
           student_id?: string | null
           student_name?: string
           subject?: string
+          summary_edited?: boolean
           understanding?: number
           user_id?: string | null
         }
