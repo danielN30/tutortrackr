@@ -177,17 +177,25 @@ function StudentAnalyticsPage() {
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto space-y-6">
-      <div>
-        <Link
-          to="/students"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Students
-        </Link>
-        <h1 className="text-2xl font-semibold text-foreground">{studentName}</h1>
-        {subject && (
-          <p className="text-sm text-muted-foreground mt-1">{subject} · {sessions.length} session{sessions.length !== 1 ? "s" : ""}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link
+            to="/students"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Students
+          </Link>
+          <h1 className="text-2xl font-semibold text-foreground">{studentName}</h1>
+          {subject && (
+            <p className="text-sm text-muted-foreground mt-1">{subject} · {sessions.length} session{sessions.length !== 1 ? "s" : ""}</p>
+          )}
+        </div>
+        {sessions.length > 0 && (
+          <Button onClick={handleExportPDF} size="sm" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
         )}
       </div>
 
