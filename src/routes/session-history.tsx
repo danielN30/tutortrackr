@@ -338,12 +338,8 @@ function SessionHistoryPage() {
                       <div className="mb-1 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <p className="text-xs font-medium text-foreground">Parent Summary</p>
-                          {s.summary_edited ? (
+                          {s.summary_edited && (
                             <Badge variant="secondary" className="h-4 px-1.5 text-[10px] font-medium">Edited</Badge>
-                          ) : (
-                            <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-medium border-primary/30 text-primary">
-                              <Sparkles className="h-2.5 w-2.5 mr-0.5" /> AI
-                            </Badge>
                           )}
                         </div>
                         {editingSummaryId !== s.id && (
