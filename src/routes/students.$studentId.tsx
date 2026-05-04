@@ -88,6 +88,85 @@ function StudentAnalyticsPage() {
     [sessions]
   );
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const navy: [number, number, number] = [15, 32, 70];
+    const teal: [number, number, number] = [20, 166, 166];
+
+    doc.setFontSize(20);
+    doc.setTextColor(...navy);
+    doc.text("Student Progress Report", 14, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Student: ${studentName}`, 14, 32);
+    if (subject) doc.text(`Subject: ${subject}`, 14, 39);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 46);
+    doc.text(`Total Sessions: ${sessions.length}`, 14, 53);
+
+    doc.setFontSize(14);
+    doc.setTextColor(...navy);
+    doc.text("Average Ratings", 14, 65);
+    autoTable(doc, {
+      startY: 69,
+      head: [["Effort", "Understanding", "Engagement"]],
+      body: [[`${averages.effort}/5`, `${averages.understanding}/5`, `${averages.engagement}/5`]],
+      headStyles: { fillColor: navy },
+      theme: "grid",
+    });
+
+    let nextY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFontSize(14);
+    doc.setTextColor(...navy);
+    doc.text("Session Ratings History", 14, nextY);
+    autoTable(doc, {
+      startY: nextY + 4,
+      head: [["Date", "Effort", "Understanding", "Engagement"]],
+      body: chartData.map((d) => [d.date, `${d.Effort}/5`, `${d.Understanding}/5`, `${d.Engagement}/5`]),
+      headStyles: { fillColor: teal },
+      theme: "striped",
+    });
+
+    nextY = (doc as any).lastAutoTable.finalY + 10;
+    const last5 = reverseSessions.slice(0, 5);
+    const summaries = last5.filter((s) => s.parent_summary);
+    if (summaries.length > 0) {
+      if (nextY > 240) { doc.addPage(); nextY = 20; }
+      doc.setFontSize(14);
+      doc.setTextColor(...navy);
+      doc.text("Last 5 Session Summaries", 14, nextY);
+      nextY += 6;
+      doc.setFontSize(10);
+      doc.setTextColor(40, 40, 40);
+      summaries.forEach((s) => {
+        const text = doc.splitTextToSize(`${s.date}: ${s.parent_summary}`, 180);
+        if (nextY + text.length * 5 > 280) { doc.addPage(); nextY = 20; }
+        doc.text(text, 14, nextY);
+        nextY += text.length * 5 + 4;
+      });
+    }
+
+    const recs = reverseSessions.filter((s) => s.recommendation).slice(0, 3);
+    if (recs.length > 0) {
+      nextY += 4;
+      if (nextY > 240) { doc.addPage(); nextY = 20; }
+      doc.setFontSize(14);
+      doc.setTextColor(...navy);
+      doc.text("Ongoing Recommendations", 14, nextY);
+      nextY += 6;
+      doc.setFontSize(10);
+      doc.setTextColor(40, 40, 40);
+      recs.forEach((s) => {
+        const text = doc.splitTextToSize(`${s.date}: ${s.recommendation}`, 180);
+        if (nextY + text.length * 5 > 280) { doc.addPage(); nextY = 20; }
+        doc.text(text, 14, nextY);
+        nextY += text.length * 5 + 4;
+      });
+    }
+
+    doc.save(`${studentName.replace(/\s+/g, "_")}_progress_report.pdf`);
+  };
+
   if (authLoading || !user) {
     return (
       <div className="flex h-full items-center justify-center py-20">
