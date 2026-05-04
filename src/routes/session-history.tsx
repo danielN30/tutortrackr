@@ -333,15 +333,56 @@ function SessionHistoryPage() {
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">{s.date}</p>
                   {s.notes && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.notes}</p>}
-                  {s.parent_summary && (
+                  {(s.parent_summary || editingSummaryId === s.id) && (
                     <div className="mt-3 rounded-lg bg-accent/50 px-3 py-2">
-                      <p className="text-xs font-medium text-foreground mb-0.5">Parent Summary</p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{s.parent_summary}</p>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-medium text-foreground">Parent Summary</p>
+                          {s.summary_edited ? (
+                            <Badge variant="secondary" className="h-4 px-1.5 text-[10px] font-medium">Edited</Badge>
+                          ) : (
+                            <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-medium border-primary/30 text-primary">
+                              <Sparkles className="h-2.5 w-2.5 mr-0.5" /> AI
+                            </Badge>
+                          )}
+                        </div>
+                        {editingSummaryId !== s.id && (
+                          <div className="flex gap-1">
+                            <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-foreground" title="Edit summary" onClick={() => startEditSummary(s)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-foreground" title="Regenerate with AI" disabled={regenSummaryId === s.id} onClick={() => regenerate(s, "summary")}>
+                              {regenSummaryId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      {editingSummaryId === s.id ? (
+                        <div className="space-y-2">
+                          <Textarea value={summaryDraft} onChange={(e) => setSummaryDraft(e.target.value)} rows={4} className="text-sm" />
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => setEditingSummaryId(null)} disabled={savingSummaryId === s.id}>
+                              <X className="h-3.5 w-3.5 mr-1" /> Cancel
+                            </Button>
+                            <Button size="sm" onClick={() => saveSummary(s)} disabled={savingSummaryId === s.id || !summaryDraft.trim()}>
+                              {savingSummaryId === s.id ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                              Save
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground leading-relaxed">{s.parent_summary}</p>
+                      )}
                     </div>
                   )}
                   {s.recommendation && (
                     <div className="mt-2 rounded-lg bg-primary/5 border border-primary/10 px-3 py-2">
-                      <p className="text-xs font-medium text-primary mb-0.5">Ongoing Recommendations</p>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-primary">Ongoing Recommendations</p>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-foreground" title="Regenerate recommendations" disabled={regenRecId === s.id} onClick={() => regenerate(s, "recommendation")}>
+                          {regenRecId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                        </Button>
+                      </div>
                       <p className="text-sm text-muted-foreground leading-relaxed">{s.recommendation}</p>
                     </div>
                   )}
