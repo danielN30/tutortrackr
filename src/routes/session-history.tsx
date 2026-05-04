@@ -24,7 +24,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { Star, BookOpen, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Star, BookOpen, Loader2, Pencil, Trash2, Sparkles, Check, X, RefreshCw } from "lucide-react";
+import { Badge } from "../components/ui/badge";
 import { SessionListSkeleton } from "@/components/skeletons";
 import { StarRating } from "../components/StarRating";
 import {
@@ -81,6 +82,80 @@ function SessionHistoryPage() {
 
   const [deleteSession, setDeleteSession] = useState<Session | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Inline summary editing & regeneration state, keyed by session id
+  const [editingSummaryId, setEditingSummaryId] = useState<string | null>(null);
+  const [summaryDraft, setSummaryDraft] = useState("");
+  const [savingSummaryId, setSavingSummaryId] = useState<string | null>(null);
+  const [regenSummaryId, setRegenSummaryId] = useState<string | null>(null);
+  const [regenRecId, setRegenRecId] = useState<string | null>(null);
+
+  const updateLocalSession = useCallback((id: string, patch: Partial<Session>) => {
+    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  }, []);
+
+  function startEditSummary(s: Session) {
+    setEditingSummaryId(s.id);
+    setSummaryDraft(s.parent_summary ?? "");
+  }
+
+  async function saveSummary(s: Session) {
+    setSavingSummaryId(s.id);
+    const { error } = await supabase
+      .from("sessions")
+      .update({ parent_summary: summaryDraft, summary_edited: true })
+      .eq("id", s.id);
+    if (error) {
+      toast.error("Failed to save summary.");
+    } else {
+      updateLocalSession(s.id, { parent_summary: summaryDraft, summary_edited: true });
+      setEditingSummaryId(null);
+      toast.success("Summary updated.");
+    }
+    setSavingSummaryId(null);
+  }
+
+  async function regenerate(s: Session, kind: "summary" | "recommendation") {
+    if (kind === "summary") setRegenSummaryId(s.id);
+    else setRegenRecId(s.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-summary", {
+        body: {
+          studentName: s.student_name,
+          subject: s.subject,
+          notes: s.notes ?? "",
+          effort: s.effort,
+          understanding: s.understanding,
+          engagement: s.engagement,
+          mode: kind,
+        },
+      });
+      if (error) throw error;
+      const updates: Partial<Session> = {};
+      if (kind === "summary" && data?.summary) {
+        updates.parent_summary = data.summary;
+        updates.summary_edited = false;
+      }
+      if (kind === "recommendation" && data?.recommendation) {
+        updates.recommendation = data.recommendation;
+      }
+      if (Object.keys(updates).length === 0) {
+        toast.error(kind === "recommendation"
+          ? "Need at least 2 sessions for this student to generate recommendations."
+          : "AI did not return a result.");
+      } else {
+        const { error: upErr } = await supabase.from("sessions").update(updates).eq("id", s.id);
+        if (upErr) throw upErr;
+        updateLocalSession(s.id, updates);
+        toast.success(kind === "summary" ? "Summary regenerated." : "Recommendations regenerated.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "AI request failed. Please try again.");
+    } finally {
+      if (kind === "summary") setRegenSummaryId(null);
+      else setRegenRecId(null);
+    }
+  }
 
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
