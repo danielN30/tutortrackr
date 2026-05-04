@@ -3,7 +3,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getSessions, type Session } from "../lib/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Loader2, ArrowLeft, TrendingUp, Brain, Zap } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Loader2, ArrowLeft, TrendingUp, Brain, Zap, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   LineChart,
   Line,
