@@ -37,8 +37,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-sidebar z-30">
         <div className="flex h-full flex-col">
           {/* Brand */}
-          <Link to="/dashboard" className="flex h-16 items-center px-5 border-b border-sidebar-border">
-            <img src="/logo.png" alt="TutorTrackr" style={{ height: 32, width: "auto" }} />
+          <Link to="/dashboard" className="flex h-20 items-center px-5 border-b border-sidebar-border">
+            <img src="/logo.png" alt="TutorTrackr" style={{ height: 48, width: "auto" }} />
           </Link>
 
           {/* Nav */}
@@ -79,9 +79,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card px-4 md:hidden">
+      <div className="fixed top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 md:hidden">
         <Link to="/dashboard" className="flex items-center">
-          <img src="/logo.png" alt="TutorTrackr" style={{ height: 32, width: "auto" }} />
+          <img src="/logo.png" alt="TutorTrackr" style={{ height: 44, width: "auto" }} />
         </Link>
         <Button
           variant="ghost"
@@ -98,8 +98,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-sidebar flex flex-col">
-            <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="flex h-14 items-center px-5 border-b border-sidebar-border">
-              <img src="/logo.png" alt="TutorTrackr" style={{ height: 32, width: "auto" }} />
+            <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="flex h-20 items-center px-5 border-b border-sidebar-border">
+              <img src="/logo.png" alt="TutorTrackr" style={{ height: 48, width: "auto" }} />
             </Link>
             <nav className="flex-1 px-3 py-4 space-y-1">
               {navItems.map((item) => {
@@ -138,7 +138,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-60 pt-14 md:pt-0 min-h-screen">
+      <main className="flex-1 md:ml-60 pt-16 md:pt-0 min-h-screen">
         {children}
       </main>
     </div>
