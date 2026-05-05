@@ -346,7 +346,36 @@ function SessionHistoryPage() {
                     <span className="text-sm text-muted-foreground">{s.subject}</span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">{s.date}</p>
-                  {s.notes && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.notes}</p>}
+                  {(() => {
+                    const topicRows = parseTopicNotes(s.notes);
+                    if (topicRows) {
+                      return (
+                        <div className="mt-3 overflow-hidden rounded-lg border border-border">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/60">
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Topic</th>
+                                <th className="px-3 py-2 text-right text-xs font-medium text-muted-foreground">Rating</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {topicRows.map((row, i) => (
+                                <tr key={i} className="border-t border-border">
+                                  <td className="px-3 py-2 text-foreground">{row.topic}</td>
+                                  <td className="px-3 py-2">
+                                    <div className="flex justify-end"><Stars count={row.rating} /></div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    }
+                    return s.notes ? (
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{s.notes}</p>
+                    ) : null;
+                  })()}
                   {(s.parent_summary || editingSummaryId === s.id) && (
                     <div className="mt-3 rounded-lg bg-accent/50 px-3 py-2">
                       <div className="mb-1 flex items-center justify-between gap-2">
