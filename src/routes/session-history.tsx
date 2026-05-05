@@ -60,7 +60,21 @@ function Stars({ count }: { count: number }) {
   );
 }
 
+const PAGE_SIZE = 10;
+
 function parseTopicNotes(notes: string | null): { topic: string; rating: number }[] | null {
+  if (!notes) return null;
+  const lines = notes.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return null;
+  const re = /^(.+?)\s+[—-]\s+(\d)\s*\/\s*5(?:\s*stars?)?$/i;
+  const parsed: { topic: string; rating: number }[] = [];
+  for (const line of lines) {
+    const m = line.match(re);
+    if (!m) return null;
+    parsed.push({ topic: m[1].trim(), rating: Number(m[2]) });
+  }
+  return parsed;
+}
   if (!notes) return null;
   const lines = notes.split("\n").map((l) => l.trim()).filter(Boolean);
   if (lines.length === 0) return null;
