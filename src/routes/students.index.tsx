@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Users, Pencil, Trash2 } from "lucide-react";
+import { Loader2, UserPlus, Users, Pencil, Trash2, Mail, CheckCircle2 } from "lucide-react";
 import { StudentListSkeleton } from "@/components/skeletons";
 import { studentInputSchema } from "@/lib/sanitize";
 
@@ -42,6 +42,7 @@ interface Student {
   name: string;
   subject: string;
   parent_email: string;
+  parent_user_id: string | null;
   created_at: string;
 }
 
@@ -225,7 +226,17 @@ function StudentsPage() {
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{s.parent_email}</p>
                   </Link>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex gap-1 shrink-0 items-center">
+                    {s.parent_user_id ? (
+                      <span className="inline-flex items-center gap-1 text-xs text-secondary mr-1" title="Parent has joined">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Linked
+                      </span>
+                    ) : (
+                      <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={(e) => { e.preventDefault(); inviteParent(s); }} disabled={invitingId === s.id}>
+                        <Mail className="h-3.5 w-3.5" />
+                        {invitingId === s.id ? "Sending…" : "Invite Parent"}
+                      </Button>
+                    )}
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={(e) => { e.preventDefault(); openEdit(s); }}>
                       <Pencil className="h-4 w-4" />
                     </Button>
