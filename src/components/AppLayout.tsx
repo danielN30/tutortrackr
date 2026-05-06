@@ -16,17 +16,19 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const tutorNav = [
-  { to: "/dashboard" as const, label: "Dashboard", icon: LayoutDashboard, tour: "nav-dashboard" },
-  { to: "/students" as const, label: "Students", icon: Users, tour: "nav-students" },
-  { to: "/" as const, label: "Log Session", icon: PenLine, exact: true, tour: "nav-log-session" },
-  { to: "/calendar" as const, label: "Calendar", icon: CalendarDays },
-  { to: "/session-history" as const, label: "History", icon: History, tour: "nav-history" },
-  { to: "/settings" as const, label: "Settings", icon: Settings },
+type NavItem = { to: "/dashboard" | "/students" | "/" | "/calendar" | "/session-history" | "/settings" | "/parent"; label: string; icon: typeof LayoutDashboard; tour?: string; exact?: boolean };
+
+const tutorNav: NavItem[] = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tour: "nav-dashboard" },
+  { to: "/students", label: "Students", icon: Users, tour: "nav-students" },
+  { to: "/", label: "Log Session", icon: PenLine, exact: true, tour: "nav-log-session" },
+  { to: "/calendar", label: "Calendar", icon: CalendarDays },
+  { to: "/session-history", label: "History", icon: History, tour: "nav-history" },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-const parentNav = [
-  { to: "/parent" as const, label: "My Child", icon: GraduationCap },
+const parentNav: NavItem[] = [
+  { to: "/parent", label: "My Child", icon: GraduationCap },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
