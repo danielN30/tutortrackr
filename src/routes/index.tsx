@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { StarRating } from "../components/StarRating";
 import { TopicTable, type TopicEntry } from "../components/TopicTable";
 import { addSession } from "../lib/sessions";
@@ -31,19 +32,20 @@ export const Route = createFileRoute("/")({
 
 function IndexPage() {
   const { user, loading: authLoading } = useAuth();
+  const { isParent, loading: roleLoading } = useRole();
   const navigate = useNavigate();
 
-  if (authLoading) {
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+    if (!roleLoading && isParent) navigate({ to: "/parent" });
+  }, [user, authLoading, isParent, roleLoading, navigate]);
+
+  if (authLoading || roleLoading || !user || isParent) {
     return (
       <div className="flex h-full items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
-  }
-
-  if (!user) {
-    navigate({ to: "/login" });
-    return null;
   }
 
   return <SessionForm userId={user.id} />;
