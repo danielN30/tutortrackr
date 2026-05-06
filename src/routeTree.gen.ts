@@ -13,6 +13,7 @@ import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionHistoryRouteImport } from './routes/session-history'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ParentRouteImport } from './routes/parent'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -38,6 +39,11 @@ const SessionHistoryRoute = SessionHistoryRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentRoute = ParentRouteImport.update({
+  id: '/parent',
+  path: '/parent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/parent': typeof ParentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
   '/settings': typeof SettingsRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/parent': typeof ParentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
   '/settings': typeof SettingsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/parent': typeof ParentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/session-history': typeof SessionHistoryRoute
   '/settings': typeof SettingsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/login'
+    | '/parent'
     | '/reset-password'
     | '/session-history'
     | '/settings'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/login'
+    | '/parent'
     | '/reset-password'
     | '/session-history'
     | '/settings'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/login'
+    | '/parent'
     | '/reset-password'
     | '/session-history'
     | '/settings'
@@ -150,6 +162,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  ParentRoute: typeof ParentRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SessionHistoryRoute: typeof SessionHistoryRoute
   SettingsRoute: typeof SettingsRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent': {
+      id: '/parent'
+      path: '/parent'
+      fullPath: '/parent'
+      preLoaderRoute: typeof ParentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  ParentRoute: ParentRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SessionHistoryRoute: SessionHistoryRoute,
   SettingsRoute: SettingsRoute,
