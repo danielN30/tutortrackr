@@ -65,6 +65,24 @@ function StudentsPage() {
 
   const [deleteStudent, setDeleteStudent] = useState<Student | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+
+  async function inviteParent(s: Student) {
+    setInvitingId(s.id);
+    const redirectTo = `${window.location.origin}/parent`;
+    const { data, error } = await supabase.functions.invoke("invite-parent", {
+      body: { studentId: s.id, parentEmail: s.parent_email, redirectTo },
+    });
+    if (error) {
+      toast.error(error.message || "Failed to send invite.");
+    } else if (data?.alreadyExisted) {
+      toast.success("Parent already has an account — linked to this student.");
+      loadStudents();
+    } else {
+      toast.success(`Invite email sent to ${s.parent_email}.`);
+    }
+    setInvitingId(null);
+  }
 
   async function loadStudents() {
     const { data, error } = await supabase
