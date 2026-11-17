@@ -11,12 +11,13 @@
 - Design: navy/teal SaaS UI, Inter, fixed sidebar, logo + favicon
 
 ## Open
-1. **Parent portal optimisation** (stated main focus)
+1. **Parent portal polish** (chosen — do first)
    - Multiple children support (currently limited to one student per parent)
    - Progress over time view for parents, cleaner mobile layout
    - Email invite delivery check + resend / revoke invites
-2. **Drag-and-drop rescheduling** on the calendar (not implemented yet)
-3. **Session reminders / notifications** (not implemented yet)
+2. **Session reminders** (chosen — do second)
+   - Notify tutors before an upcoming session starts
+3. **Drag-and-drop rescheduling** on the calendar (not implemented yet)
 4. **Google Calendar sync-ready structure** (not implemented yet)
 5. **Invoice / billing** (mentioned in an earlier brief, never built)
 6. Filter calendar by student (partially there — verify)
