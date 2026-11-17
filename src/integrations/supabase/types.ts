@@ -49,6 +49,76 @@ export type Database = {
           },
         ]
       }
+      session_requests: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number
+          id: string
+          message: string
+          parent_id: string
+          resolved_at: string | null
+          session_id: string | null
+          start_time: string
+          status: string
+          student_id: string
+          time_zone: string
+          tutor_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          duration_minutes?: number
+          id?: string
+          message?: string
+          parent_id: string
+          resolved_at?: string | null
+          session_id?: string | null
+          start_time: string
+          status?: string
+          student_id: string
+          time_zone?: string
+          tutor_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          message?: string
+          parent_id?: string
+          resolved_at?: string | null
+          session_id?: string | null
+          start_time?: string
+          status?: string
+          student_id?: string
+          time_zone?: string
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_requests_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_requests_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "shared_calendar_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           created_at: string
@@ -66,6 +136,7 @@ export type Database = {
           student_name: string
           subject: string
           summary_edited: boolean
+          time_zone: string
           understanding: number
           user_id: string | null
         }
@@ -85,6 +156,7 @@ export type Database = {
           student_name: string
           subject: string
           summary_edited?: boolean
+          time_zone?: string
           understanding: number
           user_id?: string | null
         }
@@ -104,6 +176,7 @@ export type Database = {
           student_name?: string
           subject?: string
           summary_edited?: boolean
+          time_zone?: string
           understanding?: number
           user_id?: string | null
         }
@@ -194,7 +267,65 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      shared_calendar_sessions: {
+        Row: {
+          date: string | null
+          duration_minutes: number | null
+          effort: number | null
+          engagement: number | null
+          id: string | null
+          parent_summary: string | null
+          recommendation: string | null
+          start_time: string | null
+          status: string | null
+          student_id: string | null
+          student_name: string | null
+          subject: string | null
+          time_zone: string | null
+          understanding: number | null
+        }
+        Insert: {
+          date?: string | null
+          duration_minutes?: number | null
+          effort?: number | null
+          engagement?: number | null
+          id?: string | null
+          parent_summary?: string | null
+          recommendation?: string | null
+          start_time?: string | null
+          status?: string | null
+          student_id?: string | null
+          student_name?: string | null
+          subject?: string | null
+          time_zone?: string | null
+          understanding?: number | null
+        }
+        Update: {
+          date?: string | null
+          duration_minutes?: number | null
+          effort?: number | null
+          engagement?: number | null
+          id?: string | null
+          parent_summary?: string | null
+          recommendation?: string | null
+          start_time?: string | null
+          status?: string | null
+          student_id?: string | null
+          student_name?: string | null
+          subject?: string | null
+          time_zone?: string | null
+          understanding?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
@@ -203,6 +334,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      resolve_session_request: {
+        Args: { decision: string; request_id: string }
+        Returns: string
       }
     }
     Enums: {

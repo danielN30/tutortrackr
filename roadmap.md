@@ -11,8 +11,9 @@
 - Design: navy/teal SaaS UI, Inter, fixed sidebar, logo + favicon
 
 ## Open
-1. **Session reminders** (chosen — do next)
-   - Notify tutors before an upcoming session starts
+1. **Shared calendar and session reminders** (in progress)
+   - Parents see their children's sessions and request additional sessions; tutors approve or decline
+   - Reminders for both parents and tutors; email delivery requires a configured sender domain
 2. **Drag-and-drop rescheduling** on the calendar (not implemented yet)
 3. **Google Calendar sync-ready structure** (not implemented yet)
 4. **Invoice / billing** (mentioned in an earlier brief, never built)
