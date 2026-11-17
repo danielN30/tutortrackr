@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Users, Pencil, Trash2, Mail, CheckCircle2 } from "lucide-react";
+import { Loader2, UserPlus, Users, Pencil, Trash2, Mail, CheckCircle2, X } from "lucide-react";
 import { StudentListSkeleton } from "@/components/skeletons";
 import { studentInputSchema } from "@/lib/sanitize";
 
@@ -43,6 +43,13 @@ interface Student {
   subject: string;
   parent_email: string;
   parent_user_id: string | null;
+  created_at: string;
+}
+
+interface ParentInvite {
+  student_id: string;
+  parent_email: string;
+  accepted_at: string | null;
   created_at: string;
 }
 
@@ -66,6 +73,7 @@ function StudentsPage() {
   const [deleteStudent, setDeleteStudent] = useState<Student | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [invites, setInvites] = useState<Record<string, ParentInvite>>({});
 
   async function inviteParent(s: Student) {
     setInvitingId(s.id);
@@ -84,12 +92,37 @@ function StudentsPage() {
     setInvitingId(null);
   }
 
+  async function revokeInvite(s: Student) {
+    if (!user) return;
+    const { error } = await supabase
+      .from("parent_invites")
+      .delete()
+      .eq("student_id", s.id)
+      .eq("invited_by", user.id);
+    if (error) {
+      toast.error("Failed to remove invite.");
+    } else {
+      toast.success("Invite removed.");
+      loadStudents();
+    }
+  }
+
   async function loadStudents() {
     const { data, error } = await supabase
       .from("students")
       .select("*")
       .order("created_at", { ascending: false });
     if (!error) setStudents(data ?? []);
+
+    if (user) {
+      const { data: inv } = await supabase
+        .from("parent_invites")
+        .select("student_id, parent_email, accepted_at, created_at")
+        .eq("invited_by", user.id);
+      const map: Record<string, ParentInvite> = {};
+      for (const r of (inv ?? []) as ParentInvite[]) map[r.student_id] = r;
+      setInvites(map);
+    }
     setLoading(false);
   }
 
@@ -249,6 +282,21 @@ function StudentsPage() {
                       <span className="inline-flex items-center gap-1 text-xs text-secondary mr-1" title="Parent has joined">
                         <CheckCircle2 className="h-3.5 w-3.5" /> Linked
                       </span>
+                    ) : invites[s.id] ? (
+                      <>
+                        <span
+                          className="inline-flex items-center gap-1 text-xs text-muted-foreground mr-1"
+                          title={`Invite sent ${new Date(invites[s.id].created_at).toLocaleDateString()}`}
+                        >
+                          <Mail className="h-3.5 w-3.5" /> Invite sent
+                        </span>
+                        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={(e) => { e.preventDefault(); inviteParent(s); }} disabled={invitingId === s.id}>
+                          {invitingId === s.id ? "Sending…" : "Resend"}
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" title="Remove invite" onClick={(e) => { e.preventDefault(); revokeInvite(s); }}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
                     ) : (
                       <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={(e) => { e.preventDefault(); inviteParent(s); }} disabled={invitingId === s.id}>
                         <Mail className="h-3.5 w-3.5" />

@@ -11,16 +11,19 @@
 - Design: navy/teal SaaS UI, Inter, fixed sidebar, logo + favicon
 
 ## Open
-1. **Parent portal polish** (chosen — do first)
-   - Multiple children support (currently limited to one student per parent)
-   - Progress over time view for parents, cleaner mobile layout
-   - Email invite delivery check + resend / revoke invites
-2. **Session reminders** (chosen — do second)
+1. **Session reminders** (chosen — do next)
    - Notify tutors before an upcoming session starts
-3. **Drag-and-drop rescheduling** on the calendar (not implemented yet)
-4. **Google Calendar sync-ready structure** (not implemented yet)
-5. **Invoice / billing** (mentioned in an earlier brief, never built)
-6. Filter calendar by student (partially there — verify)
+2. **Drag-and-drop rescheduling** on the calendar (not implemented yet)
+3. **Google Calendar sync-ready structure** (not implemented yet)
+4. **Invoice / billing** (mentioned in an earlier brief, never built)
+5. Filter calendar by student (partially there — verify)
+
+## Done this round
+- Parent portal: multiple children with a child switcher, one query for all their
+  sessions, Improving / Steady / Needs-attention trend chip, mobile-friendly
+  stat cards and report cards
+- Students page: pending invite now shows "Invite sent" with Resend and Remove
 
 ## Notes
-- `src/routes/parent.tsx` uses `.limit(1)` on the child lookup — one child only.
+- Parent portal view itself has not been opened as a parent account — the
+  sign-in for the parent account was declined.
